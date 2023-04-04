@@ -21,7 +21,7 @@ class NiftyViewer(ScriptedLoadableModule):
     def __init__(self, parent):
         ScriptedLoadableModule.__init__(self, parent)
         self.parent.title = "Likert-DL-rating"  
-        self.parent.categories = ["Examples"]  
+        self.parent.categories = ["Segmentation"]  
         self.parent.dependencies = ["SegmentEditor"]  
         self.parent.contributors = ["Anna Zapaishchykova (BWH), Dr. Benjamin H. Kann"]  
        
