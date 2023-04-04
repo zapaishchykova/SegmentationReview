@@ -12,19 +12,22 @@ import pandas as pd
 import numpy as np
 import SimpleITK as sitk
 
+#
+# SlicerLikertDLrating
+#
 
-class NiftyViewer(ScriptedLoadableModule):
+class SlicerLikertDLrating(ScriptedLoadableModule):
     """Uses ScriptedLoadableModule base class, available at:
     https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
     """
 
     def __init__(self, parent):
         ScriptedLoadableModule.__init__(self, parent)
-        self.parent.title = "Likert-DL-rating"  
-        self.parent.categories = ["Segmentation"]  
-        self.parent.dependencies = []  
-        self.parent.contributors = ["Anna Zapaishchykova (BWH), Dr. Benjamin H. Kann"]  
-       
+        self.parent.title = "SlicerLikertDLrating"  # TODO: make this more human readable by adding spaces
+        self.parent.categories = ["Examples"]  # TODO: set categories (folders where the module shows up in the module selector)
+        self.parent.dependencies = []  # TODO: add here list of module names that this module requires
+        self.parent.contributors = ["Anna Zapaishchykova (BWH), Dr. Benjamin H. Kann"]  # TODO: replace with "Firstname Lastname (Organization)"
+        # TODO: update with short description of the module and a link to online module documentation
         self.parent.helpText = """
 Slicer3D extension for rating using Likert-type score Deep-learning generated segmentations, with segment editor funtionality. 
 Created to speed up the validation process done by a clinician - the dataset loads in one batch with no need to load masks and volumes separately.
@@ -34,17 +37,16 @@ It is important that each nii file has a corresponding mask file with the same n
         self.parent.acknowledgementText = """
 This file was developed by Anna Zapaishchykova, BWH. 
 """
+
         # Additional initialization step after application startup is complete
         slicer.app.connect("startupCompleted()", registerSampleData)
 
-    def setup(self):
-        # Register subject hierarchy plugin
-        import SubjectHierarchyPlugins
-        scriptedPlugin = slicer.qSlicerSubjectHierarchyScriptedPlugin(None)
-        scriptedPlugin.setPythonSource(SubjectHierarchyPlugins.SegmentEditorSubjectHierarchyPlugin.filePath)
 
+#
+# SlicerLikertDLratingWidget
+#
 
-class NiftyViewerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
+class SlicerLikertDLratingWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     """Uses ScriptedLoadableModuleWidget base class, available at:
     https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
     """
@@ -79,7 +81,7 @@ class NiftyViewerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
         # Load widget from .ui file (created by Qt Designer).
         # Additional widgets can be instantiated manually and added to self.layout.
-        uiWidget = slicer.util.loadUI(self.resourcePath('UI/NiftyViewer.ui'))
+        uiWidget = slicer.util.loadUI(self.resourcePath('UI/SlicerLikertDLrating.ui'))
         
         # Layout within the collapsible button
         parametersCollapsibleButton = ctk.ctkCollapsibleButton()
@@ -88,7 +90,7 @@ class NiftyViewerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
         self.layout.addWidget(uiWidget)
         self.ui = slicer.util.childWidgetVariables(uiWidget)
-                
+
         parametersFormLayout = qt.QFormLayout(parametersCollapsibleButton)
 
         self.atlasDirectoryButton = ctk.ctkDirectoryButton()
@@ -101,11 +103,14 @@ class NiftyViewerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
         # Create logic class. Logic implements all computations that should be possible to run
         # in batch mode, without a graphical user interface.
-        self.logic = NiftyViewerLogic()
+        self.logic = SlicerLikertDLratingLogic()
+
+        # Connections
 
         # These connections ensure that we update parameter node when scene is closed
         self.addObserver(slicer.mrmlScene, slicer.mrmlScene.StartCloseEvent, self.onSceneStartClose)
         self.addObserver(slicer.mrmlScene, slicer.mrmlScene.EndCloseEvent, self.onSceneEndClose)
+        
         self.ui.PathLineEdit = ctk.ctkDirectoryButton()
         
         # These connections ensure that whenever user changes some settings on the GUI, that is saved in the MRML scene
@@ -121,8 +126,10 @@ class NiftyViewerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         #self.editorWidget.volumes.collapsed = True
          # Set parameter node first so that the automatic selections made when the scene is set are saved
             
+        
+        # Make sure parameter node is initialized (needed for module reload)
         self.initializeParameterNode()
-    
+
     def _createSegmentEditorWidget_(self):
         """Create and initialize a customize Slicer Editor which contains just some the tools that we need for the segmentation"""
 
@@ -138,8 +145,7 @@ class NiftyViewerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             'Paint', 'Draw', 'Erase',
         ])
         self.layout.addWidget(self.segmentEditorWidget)
-        
-            
+    
     def overwrite_mask_clicked(self):
         # overwrite self.segmentEditorWidget.segmentationNode()
         print("Saved segmentation",self.segmentation_files[self.current_index].split("/")[-1].split(".")[0]+"_upd.nii.gz")
@@ -154,8 +160,6 @@ class NiftyViewerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         
         img = sitk.ReadImage(file_path)
         sitk.WriteImage(img, file_path_nifti)
-
-        
     def onAtlasDirectoryChanged(self, directory):
         if self.volume_node:
             slicer.mrmlScene.RemoveNode(self.volume_node)
@@ -211,7 +215,40 @@ class NiftyViewerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             self.ui.status_checked.setText("Checked: "+ str(self.current_index) + " / "+str(self.n_files-1))
         else:
             print("All files checked") 
-           
+    
+    def load_nifti_file(self):
+        
+        # Reset the slice views to clear any remaining segmentations
+        slicer.util.resetSliceViews()
+        
+        # ToDo: add 3d tumor view
+        file_path = self.nifti_files[self.current_index]
+        if self.volume_node:
+            slicer.mrmlScene.RemoveNode(self.volume_node)
+        if self.segmentation_node:
+            slicer.mrmlScene.RemoveNode(self.segmentation_node)
+
+        self.volume_node = slicer.util.loadVolume(file_path)
+        slicer.app.applicationLogic().PropagateVolumeSelection(0)
+
+        segmentation_file_path = self.segmentation_files[self.current_index]
+        self.segmentation_node = slicer.util.loadSegmentation(segmentation_file_path)
+        self.segmentation_node.GetDisplayNode().SetColor(self.segmentation_color)
+        self.set_segmentation_and_mask_for_segmentation_editor()        
+        
+        print(file_path,segmentation_file_path)
+
+
+    def set_segmentation_and_mask_for_segmentation_editor(self):
+        slicer.app.processEvents()
+        self.segmentEditorWidget.setMRMLScene(slicer.mrmlScene)
+        segmentEditorNode = slicer.vtkMRMLSegmentEditorNode()
+        slicer.mrmlScene.AddNode(segmentEditorNode)
+        self.segmentEditorWidget.setMRMLSegmentEditorNode(segmentEditorNode)
+        self.segmentEditorWidget.setSegmentationNode(self.segmentation_node)
+        self.segmentEditorWidget.setMasterVolumeNode(self.volume_node)
+
+
     def cleanup(self):
         """
         Called when the application closes and the module widget is destroyed.
@@ -295,6 +332,7 @@ class NiftyViewerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         # Make sure GUI changes do not call updateParameterNodeFromGUI (it could cause infinite loop)
         self._updatingGUIFromParameterNode = True
 
+
         # All the GUI updates are done
         self._updatingGUIFromParameterNode = False
 
@@ -308,42 +346,15 @@ class NiftyViewerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             return
 
         wasModified = self._parameterNode.StartModify()  # Modify all properties in a single batch
+
         self._parameterNode.EndModify(wasModified)
 
-    def load_nifti_file(self):
-        
-        # Reset the slice views to clear any remaining segmentations
-        slicer.util.resetSliceViews()
-        
-        # ToDo: add 3d tumor view
-        file_path = self.nifti_files[self.current_index]
-        if self.volume_node:
-            slicer.mrmlScene.RemoveNode(self.volume_node)
-        if self.segmentation_node:
-            slicer.mrmlScene.RemoveNode(self.segmentation_node)
 
-        self.volume_node = slicer.util.loadVolume(file_path)
-        slicer.app.applicationLogic().PropagateVolumeSelection(0)
+#
+# SlicerLikertDLratingLogic
+#
 
-        segmentation_file_path = self.segmentation_files[self.current_index]
-        self.segmentation_node = slicer.util.loadSegmentation(segmentation_file_path)
-        self.segmentation_node.GetDisplayNode().SetColor(self.segmentation_color)
-        self.set_segmentation_and_mask_for_segmentation_editor()        
-        
-        print(file_path,segmentation_file_path)
-
-
-    def set_segmentation_and_mask_for_segmentation_editor(self):
-        slicer.app.processEvents()
-        self.segmentEditorWidget.setMRMLScene(slicer.mrmlScene)
-        segmentEditorNode = slicer.vtkMRMLSegmentEditorNode()
-        slicer.mrmlScene.AddNode(segmentEditorNode)
-        self.segmentEditorWidget.setMRMLSegmentEditorNode(segmentEditorNode)
-        self.segmentEditorWidget.setSegmentationNode(self.segmentation_node)
-        self.segmentEditorWidget.setMasterVolumeNode(self.volume_node)
-
-
-class NiftyViewerLogic(ScriptedLoadableModuleLogic):
+class SlicerLikertDLratingLogic(ScriptedLoadableModuleLogic):
     """This class should implement all the actual
     computation done by your module.  The interface
     should be such that other python code can import
@@ -359,9 +370,12 @@ class NiftyViewerLogic(ScriptedLoadableModuleLogic):
         """
         ScriptedLoadableModuleLogic.__init__(self)
 
+    
+#
+# SlicerLikertDLratingTest
+#
 
-
-class NiftyViewerTest(ScriptedLoadableModuleTest):
+class SlicerLikertDLratingTest(ScriptedLoadableModuleTest):
     """
     This is the test case for your scripted module.
     Uses ScriptedLoadableModuleTest base class, available at:
@@ -377,9 +391,9 @@ class NiftyViewerTest(ScriptedLoadableModuleTest):
         """Run as few or as many tests as needed here.
         """
         self.setUp()
-        self.test_NiftyViewer1()
+        self.test_SlicerLikertDLrating1()
 
-    def test_NiftyViewer1(self):
+    def test_SlicerLikertDLrating1(self):
         """ Ideally you should have several levels of tests.  At the lowest level
         tests should exercise the functionality of the logic with different inputs
         (both valid and invalid).  At higher levels your tests should emulate the
