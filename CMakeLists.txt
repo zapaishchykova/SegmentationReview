@@ -1,5 +1,5 @@
 #-----------------------------------------------------------------------------
-set(MODULE_NAME SlicerLikertDLrating)
+set(MODULE_NAME SlicerSegReview)
 
 #-----------------------------------------------------------------------------
 set(MODULE_PYTHON_SCRIPTS

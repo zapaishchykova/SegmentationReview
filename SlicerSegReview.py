@@ -13,10 +13,10 @@ import numpy as np
 import SimpleITK as sitk
 
 #
-# SlicerLikertDLrating
+# SlicerSegReview
 #
 
-class SlicerLikertDLrating(ScriptedLoadableModule):
+class SlicerSegReview(ScriptedLoadableModule):
     """Uses ScriptedLoadableModule base class, available at:
     https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
     """
@@ -38,15 +38,12 @@ It is important that each nii file has a corresponding mask file with the same n
 This file was developed by Anna Zapaishchykova, BWH. 
 """
 
-        # Additional initialization step after application startup is complete
-        slicer.app.connect("startupCompleted()", registerSampleData)
-
 
 #
 # SlicerLikertDLratingWidget
 #
 
-class SlicerLikertDLratingWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
+class SlicerSegReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     """Uses ScriptedLoadableModuleWidget base class, available at:
     https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
     """
@@ -81,7 +78,7 @@ class SlicerLikertDLratingWidget(ScriptedLoadableModuleWidget, VTKObservationMix
 
         # Load widget from .ui file (created by Qt Designer).
         # Additional widgets can be instantiated manually and added to self.layout.
-        uiWidget = slicer.util.loadUI(self.resourcePath('UI/SlicerLikertDLrating.ui'))
+        uiWidget = slicer.util.loadUI(self.resourcePath('UI/SlicerSegReview.ui'))
         
         # Layout within the collapsible button
         parametersCollapsibleButton = ctk.ctkCollapsibleButton()
@@ -128,7 +125,7 @@ class SlicerLikertDLratingWidget(ScriptedLoadableModuleWidget, VTKObservationMix
             
         
         # Make sure parameter node is initialized (needed for module reload)
-        self.initializeParameterNode()
+        #self.initializeParameterNode()
 
     def _createSegmentEditorWidget_(self):
         """Create and initialize a customize Slicer Editor which contains just some the tools that we need for the segmentation"""
@@ -305,8 +302,8 @@ class SlicerLikertDLratingWidget(ScriptedLoadableModuleWidget, VTKObservationMix
         Observation is needed because when the parameter node is changed then the GUI must be updated immediately.
         """
 
-        if inputParameterNode:
-            self.logic.setDefaultParameters(inputParameterNode)
+        #if inputParameterNode:
+        #    self.logic.setDefaultParameters(inputParameterNode)
 
         # Unobserve previously selected parameter node and add an observer to the newly selected.
         # Changes of parameter node are observed so that whenever parameters are changed by a script or any other module
