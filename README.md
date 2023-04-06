@@ -5,8 +5,14 @@ Slicer3D extension for rating using Likert-type(4 Scale, 1: Acceptable, no chang
 ![Screenshot](pics/screenshot.jpg)
 ## Adding the extension to Slicer3D
 1. Download and unzip this repo.
-2. Add the unzipped path to additional module paths in menu: Edit / Application settings / Modules.
-3. Restart Slicer3D (new module should pop up in the module list under "Examples" category)
+2. Install additional python dependencies. For that, navigate to the python interactir window in Slicer3D (menu: View / Python Interactor) and run the following commands:
+```
+slicer.until.pip_install("numpy")
+slicer.until.pip_install("pandas") 
+slicer.until.pip_install("simpleitk") 
+```
+3. Add the unzipped path to additional module paths in menu: Edit / Application settings / Modules.
+4. Restart Slicer3D (new module should pop up in the module list under "Examples" category)
 
 
 ## Tutorial

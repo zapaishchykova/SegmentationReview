@@ -1,10 +1,6 @@
 import logging
 import os
 
-import pip
-pip.main(['install', 'pandas'])
-pip.main(['install', 'numpy'])
-pip.main(['install', 'SimpleITK'])
 
 import vtk
 import pathlib
