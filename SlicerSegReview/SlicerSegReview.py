@@ -9,10 +9,19 @@ from slicer.ScriptedLoadableModule import *
 from slicer.util import VTKObservationMixin
 import ctk
 import qt
-import pandas as pd
-import numpy as np
-import SimpleITK as sitk
 
+try:
+    import pandas as pd
+    import numpy as np
+    import SimpleITK as sitk
+except:
+    slicer.util.pip_install('pandas')
+    slicer.util.pip_install('numpy')
+    slicer.util.pip_install('SimpleITK')
+    
+    import pandas as pd
+    import numpy as np
+    import SimpleITK as sitk
 #
 # SlicerSegReview
 #
