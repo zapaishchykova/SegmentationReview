@@ -29,7 +29,7 @@
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>100</height>
+          <height>150</height>
          </size>
         </property>
         <property name="title">
@@ -85,6 +85,42 @@
          </property>
          <property name="text">
           <string>4 - Unacceptable,  not visible </string>
+         </property>
+        </widget>
+        <widget class="QRadioButton" name="radioButton_5">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>100</y>
+           <width>358</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>5 - Bad image</string>
+         </property>
+        </widget>
+        <widget class="QPlainTextEdit" name="comment">
+         <property name="geometry">
+          <rect>
+           <x>80</x>
+           <y>125</y>
+           <width>271</width>
+           <height>21</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QLabel" name="status_checked_2">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>130</y>
+           <width>71</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Comment:</string>
          </property>
         </widget>
        </widget>

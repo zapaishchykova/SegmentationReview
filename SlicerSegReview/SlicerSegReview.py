@@ -207,10 +207,13 @@ class SlicerSegReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             likert_score=3
         elif self.ui.radioButton_4.isChecked():
             likert_score=4
+        elif self.ui.radioButton_5.isChecked():
+            likert_score=5
             
-        self.likert_scores.append([self.current_index, likert_score])
+            
+        self.likert_scores.append([self.current_index, likert_score, self.ui.comment.toPlainText()])
         # append data frame to CSV file
-        data = {'file': [self.nifti_files[self.current_index].split("/")[-1]], 'annotation': [likert_score]}
+        data = {'file': [self.nifti_files[self.current_index].split("/")[-1]], 'annotation': [likert_score],'comment': [self.ui.comment.toPlainText()]}
         df = pd.DataFrame(data)   
         df.to_csv(self.directory+"/annotations.csv", mode='a', index=False, header=False)
 
@@ -219,6 +222,7 @@ class SlicerSegReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             self.current_index += 1
             self.load_nifti_file()
             self.ui.status_checked.setText("Checked: "+ str(self.current_index) + " / "+str(self.n_files-1))
+            self.ui.comment.setPlainText("")
         else:
             print("All files checked") 
     
