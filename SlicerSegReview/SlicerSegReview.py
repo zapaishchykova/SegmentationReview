@@ -209,9 +209,8 @@ class SlicerSegReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             likert_score=4
             
         self.likert_scores.append([self.current_index, likert_score])
-        
         # append data frame to CSV file
-        data = {'file': [self.nifti_files[self.current_index].split("/")[-1]], 'annotation': [self.current_index]}
+        data = {'file': [self.nifti_files[self.current_index].split("/")[-1]], 'annotation': [likert_score]}
         df = pd.DataFrame(data)   
         df.to_csv(self.directory+"/annotations.csv", mode='a', index=False, header=False)
 
