@@ -40,5 +40,5 @@ When done, click "Save and Next" to go to the next image. The results will be sa
 
 4. **Optional** - if you want to change the segmentation mask of the image, you can do it by using the brushes/eraser from the Segment Editor module added to the extension. When done, click "Overwrite edited mask". The new mask will be saved in the same folder as the original mask, with the same name, but with "_upd" added to the end of the name. 
 
-## License: 
-This extension is distributed under the terms of the MIT license. See LICENSE.txt for details.
+## License
+This extension is distributed under the terms of the MIT license.
