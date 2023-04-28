@@ -33,7 +33,7 @@ class SlicerSegReview(ScriptedLoadableModule):
 
     def __init__(self, parent):
         ScriptedLoadableModule.__init__(self, parent)
-        self.parent.title = "SlicerSegReview"  # TODO: make this more human readable by adding spaces
+        self.parent.title = "SegmentationReview"  # TODO: make this more human readable by adding spaces
         self.parent.categories = ["Examples"]  # TODO: set categories (folders where the module shows up in the module selector)
         self.parent.dependencies = []  # TODO: add here list of module names that this module requires
         self.parent.contributors = ["Anna Zapaishchykova (BWH), Dr. Benjamin H. Kann"]  # TODO: replace with "Firstname Lastname (Organization)"
