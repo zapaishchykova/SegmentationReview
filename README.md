@@ -2,7 +2,12 @@
 Slicer3D extension for rating using Likert-type(4 Scale, 1: Acceptable, no changes; 2: Acceptable, minor changes; 3: Unacceptable, major changes; 4: Unacceptable, not visible/wrong location) score Deep-learning generated segmentations, with segment editor. Created to speed up the validation process done by a clinician - the dataset loads in one batch with no need to load masks and volumes separately. The results are saved in a csv file, which can be used for further analysis.
 
 
-![Screenshot](pics/screenshot.jpg)
+![Screenshot](pics/screenshot.png)
+A) AI-generated segmentation ratings are saved into a .csv file, which could be further analyzed with any tool of choice (here, we visualized a dummy dataset using MS Office).
+B) Example of input dataset structure that is required by the software.
+C) SegmentationReview GUI with panels overview: Likert-type segmentation assessment (1-Acceptable, no changes; 2-Acceptable, minor changes; 3-Unacceptable, major changes; 4-Unacceptable, not visible; 5-Bad image), Segmentation editor panel and 2D/3D segmentation view.
+
+
 ## Adding the extension to Slicer3D
 1. Download and unzip this repo.
 2. Install additional python dependencies. For that, navigate to the python interactir window in Slicer3D (menu: View / Python Interactor) and run the following commands:
