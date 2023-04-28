@@ -23,37 +23,36 @@ except:
     import numpy as np
     import SimpleITK as sitk
 #
-# SlicerSegReview
+# SegmentationReview
 #
 
-class SlicerSegReview(ScriptedLoadableModule):
+class SegmentationReview(ScriptedLoadableModule):
     """Uses ScriptedLoadableModule base class, available at:
     https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
     """
 
     def __init__(self, parent):
         ScriptedLoadableModule.__init__(self, parent)
-        self.parent.title = "SegmentationReview"  # TODO: make this more human readable by adding spaces
-        self.parent.categories = ["Examples"]  # TODO: set categories (folders where the module shows up in the module selector)
-        self.parent.dependencies = []  # TODO: add here list of module names that this module requires
-        self.parent.contributors = ["Anna Zapaishchykova (BWH), Dr. Benjamin H. Kann"]  # TODO: replace with "Firstname Lastname (Organization)"
-        # TODO: update with short description of the module and a link to online module documentation
+        self.parent.title = "SegmentationReview"  
+        self.parent.categories = ["Examples"]  
+        self.parent.dependencies = []  
+        self.parent.contributors = ["Anna Zapaishchykova (BWH), Dr. Benjamin H. Kann"]  
         self.parent.helpText = """
 Slicer3D extension for rating using Likert-type score Deep-learning generated segmentations, with segment editor funtionality. 
 Created to speed up the validation process done by a clinician - the dataset loads in one batch with no need to load masks and volumes separately.
 It is important that each nii file has a corresponding mask file with the same name and the suffix _mask.nii
 """
-        # TODO: replace with organization, grant and thanks
+       
         self.parent.acknowledgementText = """
 This file was developed by Anna Zapaishchykova, BWH. 
 """
 
 
 #
-# SlicerLikertDLratingWidget
+# SegmentationReviewWidget
 #
 
-class SlicerSegReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
+class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     """Uses ScriptedLoadableModuleWidget base class, available at:
     https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
     """
@@ -88,7 +87,7 @@ class SlicerSegReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
         # Load widget from .ui file (created by Qt Designer).
         # Additional widgets can be instantiated manually and added to self.layout.
-        uiWidget = slicer.util.loadUI(self.resourcePath('UI/SlicerSegReview.ui'))
+        uiWidget = slicer.util.loadUI(self.resourcePath('UI/SegmentationReview.ui'))
         
         # Layout within the collapsible button
         parametersCollapsibleButton = ctk.ctkCollapsibleButton()
