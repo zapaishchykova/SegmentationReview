@@ -1,44 +1,72 @@
 # SegmentationReview
-3D Slicer extension for rating using Likert-type(4 Scale, 1: Acceptable, no changes; 2: Acceptable, minor changes; 3: Unacceptable, major changes; 4: Unacceptable, not visible/wrong location) score Deep-learning generated segmentations, with segment editor. Created to speed up the validation process done by a clinician - the dataset loads in one batch with no need to load masks and volumes separately. The results are saved in a csv file, which can be used for further analysis.
 
+The SegmentationReview extension is a powerful tool for clinicians who need to quickly and efficiently review deep-learning generated segmentations. With this extension, you can use a Likert-type rating system that scores segmentations on a four-point scale, ranging from "Acceptable with no changes" to "Unacceptable, not visible/wrong location".
 
-![Screenshot](pics/screenshot.png)
-A) AI-generated segmentation ratings are saved into a .csv file, which could be further analyzed with any tool of choice (here, we visualized a dummy dataset using MS Office).
-B) Example of input dataset structure that is required by the software.
-C) SegmentationReview GUI with panels overview: Likert-type segmentation assessment (1-Acceptable, no changes; 2-Acceptable, minor changes; 3-Unacceptable, major changes; 4-Unacceptable, not visible; 5-Bad image), Segmentation editor panel and 2D/3D segmentation view.
+One of the key benefits of SegmentationReview is the ability to load the entire dataset with all masks and volumes in one batch. This simplifies the workflow and eliminates the need to load masks and volumes separately. Additionally, the results of the review are saved as a csv file, which can be easily used for further analysis.
 
+Overall, SegmentationReview provides a streamlined solution for clinicians who want to speed up the validation process of deep-learning generated segmentations. It is a valuable tool that can help to improve workflow efficiency and reduce the burden associated with segmentation validation.
 
-## Adding the extension to 3D Slicer
-1. Download and unzip this repo.
-2. Install additional python dependencies. For that, navigate to the python interactir window in 3D Slicer (menu: View / Python Interactor) and run the following commands:
-```
-slicer.util.pip_install("numpy")
-slicer.util.pip_install("pandas") 
-slicer.util.pip_install("simpleitk") 
-```
-3. Add the unzipped path to additional module paths in menu: Edit / Application settings / Modules.
-4. Restart 3D Slicer (new module should pop up in the module list under "Examples" category)
+## Installing the extension
 
+You can install `SegmentationReview` from the 3D Slicer [extensions manager](https://slicer.readthedocs.io/en/latest/user_guide/extensions_manager.html).
+
+To open the extension manager, go to `View -> Extensions Manager` in the main menu. In the extensions manager, search for `SegmentationReview` and click  `Install` to install the extension. Once the extension is installed, switch to the `SegmentationReview` module by clicking `Modules -> SegmentationReview` in the main menu.
+
+## Interface
+
+<p align="center">
+  <img width="75%" src="pics/screenshot.png" alt="SegmentationReview Screenshot">
+</p>
+
+**Panel Overview:**
+
+C) The interface displays three main panels:
+- **Likert-type segmentation assessment**: Ratings are provided on a scale of 1 to 4, representing levels of (1) Acceptable with no changes, (2) Acceptable with minor changes, (3) Unacceptable with major changes, and (4) Unacceptable and not visible. A 5th option for bad images is also available.
+- **Segmentation Editor**: The editor panel allows for fine-tuning of the segmentation.
+- **2D/3D Segmentation View**: The 2D/3D view allows for visualization and comparison of the original image and the segmentation.
+
+**Dataset Input Structure:**
+
+B) This image shows an example of the input dataset structure required by the SegmentationReview software.
+
+**Results:**
+
+A) AI-generated segmentation ratings are automatically saved as a .csv file, which can be further analyzed using any tool of choice. The example above presents a dummy dataset using MS Office, but any other analysis tool can be used.
 
 ## Tutorial
-1. Prepare the dataset - create a folder with the following structure:
-```
-- image1.nii.gz
-- image1_mask.nii.gz
-- image2.nii.gz
-- image2_mask.nii.gz
-....
-```
 
-2. Load the dataset into 3D Slicer:
-![Load the dataset](pics/load.png)
-You will see how many images are loaded under the "Checked" status. If the path is opened the first time, there will be "annotations.csv" file created in the same folder. This file will contain the results of the rating, and will be updated after each rating. Additionaly the "annotations.csv" allows to restore the annotation process in case of a crash/ too many images to rate in one session.
+1. **Prepare the dataset:** To get started, create a folder with the following file structure:
 
-3. Assin the Likert score to the image:
-![Rating](pics/likert.png)
-When done, click "Save and Next" to go to the next image. The results will be saved in the "annotations.csv" file. 
+    ```
+    - image1.nii.gz
+    - image1_mask.nii.gz
+    - image2.nii.gz
+    - image2_mask.nii.gz
+    ...
+    ```
+    The images should be in NIfTI format (`.nii.gz`), with corresponding segmentation masks labeled `_mask.nii.gz`.
 
-4. **Optional** - if you want to change the segmentation mask of the image, you can do it by using the brushes/eraser from the Segment Editor module added to the extension. When done, click "Overwrite edited mask". The new mask will be saved in the same folder as the original mask, with the same name, but with "_upd" added to the end of the name. 
+2. **Load the dataset into 3D Slicer:** After starting 3D Slicer, open `File -> Add Data` from the main menu, then select the folder containing the images and masks and press `OK`. After loading, you will see how many images are loaded under the _Checked_ status. If the path is opened for the first time, an `annotations.csv` file will be created in the same folder. This file will contain the results of the rating and will be automatically updated after each rating. Additionally, the `annotations.csv` file allows you to restore the annotation process in case of a crash or if there are too many images to rate in one session.
+
+3. **Assign a Likert score to each image:** In the "SegmentationReview" module, click on the `Likert rating` tab, select the image, and then select a rating from the drop-down menu (ranging from _Acceptable with no changes_ to _Unacceptable and not visible_). When you're done, click `Save and Next` to move to the next image. The results will be automatically saved in the `annotations.csv` file.
+
+4. **Optional: Edit the mask of an image:** If you want to change the segmentation mask of any image, you can use the "Segment Editor" module that is added to the extension. Select the `Segment editor` tab, edit the mask using the brushes or eraser, and then click `Overwrite edited mask` to save the new mask. The new mask will be saved in the same folder as the original mask, with `_upd` added to the end of the name.
+
+## Maintainers
+
+Here are the steps to install the extension from source and develop the extension locally. This is useful for testing and contributing changes leveraging the GitHub pull request contribution workflow.
+
+1. Download the source code using `git`
+
+  ```
+  git clone git@github.com:zapaishchykova/SegmentationReview.git
+  ```
+
+2. After starting 3D Slicer, [install the module by drag&drop](https://discourse.slicer.org/t/new-feature-install-modules-by-drag-and-drop-python-files/28311) the extension source directory.
+
+3. Enabling the [developer mode](https://slicer.readthedocs.io/en/latest/user_guide/settings.html#developer-mode) will allow to reload the module from source without having to restart the application.
+
 
 ## License
+
 This extension is distributed under the terms of the MIT license.
