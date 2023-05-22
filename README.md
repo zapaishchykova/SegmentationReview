@@ -27,11 +27,22 @@ The interface displays three main panels:
 
 **Results:**
 
-AI-generated segmentation ratings are automatically saved as a .csv file, which can be further analyzed using any tool of choice. The example above presents a dummy dataset using MS Office, but any other analysis tool can be used.
+AI-generated segmentation ratings are automatically saved as a .csv file, which can be further analyzed using any tool of choice. The example above presents a dummy dataset using MS Office, but any other analysis tool can be used. 
 
 <p align="center">
   <img width="50%" src="pics/example.png" alt="Example Analysis in MS Office">
 </p>
+
+The `annotation.csv` has a following structure (with no header):
+
+| Filename | Rating | Comments |
+| ---         |     ---      |          --- |
+| image1.nii.gz   | 1     |     |
+| image2.nii.gz     | 5       | wrong sequence     | 
+| ...    | ...      | ...    | 
+
+"Rating" (2nd column) has the following encoding: (1) Acceptable with no changes, (2) Acceptable with minor changes, (3) Unacceptable with major changes, (4) Unacceptable and not visible, and (5) Bad images.
+
 
 ## Tutorial
 
@@ -52,15 +63,6 @@ AI-generated segmentation ratings are automatically saved as a .csv file, which 
 
 4. **Optional: Edit the mask of an image:** If you want to change the segmentation mask of any image, you can use the "Segment Editor" module that is added to the extension. Select the `Segment editor` tab, edit the mask using the brushes or eraser, and then click `Overwrite edited mask` to save the new mask. The new mask will be saved in the same folder as the original mask, with `_upd` added to the end of the name.
 
-5. **Check results in `annotation.csv` file:** Use the `annotation.csv` to check your ratings. The `annotation.csv` has a following structure (with no header):
-
-| Filename | Rating | Comments |
-| ---         |     ---      |          --- |
-| image1.nii.gz   | 1     |     |
-| image2.nii.gz     | 5       | wrong sequence     | 
-| ...    | ...      | ...    | 
-
-"Rating" (2nd column) has the following encoding: (1) Acceptable with no changes, (2) Acceptable with minor changes, (3) Unacceptable with major changes, (4) Unacceptable and not visible, and (5) Bad images.
 
 ## Maintainers
 
