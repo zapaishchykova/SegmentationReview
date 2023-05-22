@@ -60,7 +60,7 @@ A) AI-generated segmentation ratings are automatically saved as a .csv file, whi
 | image2.nii.gz     | 5       | wrong sequence     | 
 | ...    | ...      | ...    | 
 
-, where "Rating"(2nd column) has the following encoding: (1) Acceptable with no changes, (2) Acceptable with minor changes, (3) Unacceptable with major changes, (4) Unacceptable and not visible, and (5) Bad images.
+"Rating" (2nd column) has the following encoding: (1) Acceptable with no changes, (2) Acceptable with minor changes, (3) Unacceptable with major changes, (4) Unacceptable and not visible, and (5) Bad images.
 
 ## Maintainers
 
