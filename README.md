@@ -15,23 +15,23 @@ To open the extension manager, go to `View -> Extensions Manager` in the main me
 ## Interface
 
 <p align="center">
-  <img width="75%" src="pics/screenshot.png" alt="SegmentationReview Screenshot">
+  <img width="75%" src="pics/main_readme.png" alt="SegmentationReview Screenshot">
 </p>
 
 **Panel Overview:**
 
-C) The interface displays three main panels:
+The interface displays three main panels:
 - **Likert-type segmentation assessment**: Ratings are provided on a scale of 1 to 4, representing levels of (1) Acceptable with no changes, (2) Acceptable with minor changes, (3) Unacceptable with major changes, and (4) Unacceptable and not visible. A 5th option for bad images is also available.
 - **Segmentation Editor**: The editor panel allows for fine-tuning of the segmentation.
 - **2D/3D Segmentation View**: The 2D/3D view allows for visualization and comparison of the original image and the segmentation.
 
-**Dataset Input Structure:**
-
-B) This image shows an example of the input dataset structure required by the SegmentationReview software.
-
 **Results:**
 
-A) AI-generated segmentation ratings are automatically saved as a .csv file, which can be further analyzed using any tool of choice. The example above presents a dummy dataset using MS Office, but any other analysis tool can be used.
+AI-generated segmentation ratings are automatically saved as a .csv file, which can be further analyzed using any tool of choice. The example above presents a dummy dataset using MS Office, but any other analysis tool can be used.
+
+<p align="center">
+  <img width="50%" src="pics/example.png" alt="Example Analysis in MS Office">
+</p>
 
 ## Tutorial
 
