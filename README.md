@@ -57,6 +57,8 @@ The `annotation.csv` has a following structure (with no header):
     ```
     The images should be in NIfTI format (`.nii.gz`), with corresponding segmentation masks labeled `_mask.nii.gz`.
 
+An example dataset of T1w brain scans and their corresponding brain segmentations is provided in the `example_data` folder with already reviewed images. You can use this dataset to test the extension. If you want to review the images yourself, you can delete the `annotations.csv` file and start the review process from scratch.
+
 2. **Load the dataset into 3D Slicer:** After starting 3D Slicer, open `File -> Add Data` from the main menu, then select the folder containing the images and masks and press `OK`. After loading, you will see how many images are loaded under the _Checked_ status. If the path is opened for the first time, an `annotations.csv` file will be created in the same folder. This file will contain the results of the rating and will be automatically updated after each rating. Additionally, the `annotations.csv` file allows you to restore the annotation process in case of a crash or if there are too many images to rate in one session.
 
 3. **Assign a Likert score to each image:** In the "SegmentationReview" module, click on the `Likert rating` tab, select the image, and then select a rating from the drop-down menu (ranging from _Acceptable with no changes_ to _Unacceptable and not visible_). When you're done, click `Save and Next` to move to the next image. The results will be automatically saved in the `annotations.csv` file.
@@ -77,6 +79,10 @@ Here are the steps to install the extension from source and develop the extensio
 2. After starting 3D Slicer, [install the module by drag&drop](https://discourse.slicer.org/t/new-feature-install-modules-by-drag-and-drop-python-files/28311) the extension source directory.
 
 3. Enabling the [developer mode](https://slicer.readthedocs.io/en/latest/user_guide/settings.html#developer-mode) will allow to reload the module from source without having to restart the application.
+
+## Example Dataset
+
+The example data was obtained from the [OpenfMRI databaset](https://openfmri.org/dataset/ds000228/). Its accession number is ds000228. Brains were segmented using [HD Brain Extraction tool](https://github.com/lassoan/SlicerHDBrainExtraction#hdbrainextraction). 
 
 
 ## License
