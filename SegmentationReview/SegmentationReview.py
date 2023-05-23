@@ -36,7 +36,7 @@ class SegmentationReview(ScriptedLoadableModule):
         self.parent.title = "SegmentationReview"  
         self.parent.categories = ["Examples"]  
         self.parent.dependencies = []  
-        self.parent.contributors = ["Anna Zapaishchykova (BWH), Dr. Benjamin H. Kann"]  
+        self.parent.contributors = ["Anna Zapaishchykova (BWH), Dr. Benjamin H. Kann, AIM-Harvard"]  
         self.parent.helpText = """
 Slicer3D extension for rating using Likert-type score Deep-learning generated segmentations, with segment editor funtionality. 
 Created to speed up the validation process done by a clinician - the dataset loads in one batch with no need to load masks and volumes separately.
