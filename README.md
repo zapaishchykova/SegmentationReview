@@ -88,7 +88,7 @@ The example data was obtained from the [OpenfMRI databaset](https://openfmri.org
 ## Citation
 Anna Zapaishchykova, Divyanshu Tak, Aidan Boyd, Zezhong Ye, Hugo J.W.L. Aerts, Benjamin H. Kann
 "SegmentationReview: A Slicer3D extension for fast review of AI-generated segmentations"
-[https://doi.org/10.1016/j.simpa.2023.100536]https://doi.org/10.1016/j.simpa.2023.100536
+[https://doi.org/10.1016/j.simpa.2023.100536](https://doi.org/10.1016/j.simpa.2023.100536)
 
 
 ## License
