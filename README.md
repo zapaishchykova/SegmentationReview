@@ -85,6 +85,12 @@ Here are the steps to install the extension from source and develop the extensio
 The example data was obtained from the [OpenfMRI databaset](https://openfmri.org/dataset/ds000228/). Its accession number is ds000228. Brains were segmented using [HD Brain Extraction tool](https://github.com/lassoan/SlicerHDBrainExtraction#hdbrainextraction). 
 
 
+## Citation
+Anna Zapaishchykova, Divyanshu Tak, Aidan Boyd, Zezhong Ye, Hugo J.W.L. Aerts, Benjamin H. Kann
+"SegmentationReview: A Slicer3D extension for fast review of AI-generated segmentations"
+[https://doi.org/10.1016/j.simpa.2023.100536]https://doi.org/10.1016/j.simpa.2023.100536
+
+
 ## License
 
 This extension is distributed under the terms of the MIT license.
