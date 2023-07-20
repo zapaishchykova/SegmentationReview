@@ -66,19 +66,25 @@ An example dataset of T1w brain scans and their corresponding brain segmentation
 4. **Optional: Edit the mask of an image:** If you want to change the segmentation mask of any image, you can use the "Segment Editor" module that is added to the extension. Select the `Segment editor` tab, edit the mask using the brushes or eraser, and then click `Overwrite edited mask` to save the new mask. The new mask will be saved in the same folder as the original mask, with `_upd` added to the end of the name.
 
 
-## Maintainers
 
-Here are the steps to install the extension from source and develop the extension locally. This is useful for testing and contributing changes leveraging the GitHub pull request contribution workflow.
+## Installation
 
-1. Download the source code using `git`
+This extension is available from the extensions marketplace starting v.5.3.0 (currently a preview version). Here are the steps to install the extension from the source and develop the extension locally. This is useful for testing and contributing changes leveraging the GitHub pull request contribution workflow.
+
+1. Download the source code using `git` / OR download the .zip and unpack it
 
   ```
   git clone git@github.com:zapaishchykova/SegmentationReview.git
   ```
 
-2. After starting 3D Slicer, [install the module by drag&drop](https://discourse.slicer.org/t/new-feature-install-modules-by-drag-and-drop-python-files/28311) the extension source directory.
+(Optional) Enable the [developer mode](https://slicer.readthedocs.io/en/latest/user_guide/settings.html#developer-mode) will allow to reload the module from source without having to restart the application.
 
-3. Enabling the [developer mode](https://slicer.readthedocs.io/en/latest/user_guide/settings.html#developer-mode) will allow to reload the module from source without having to restart the application.
+3. After starting 3D Slicer:
+-  [install the module by drag&drop](https://discourse.slicer.org/t/new-feature-install-modules-by-drag-and-drop-python-files/28311) the extension source directory (works only in Preview Release)
+OR
+-  Navigate to "Developer tools"-> "Extension wizard" -> "Select extension" and point to the root of the cloned repo. 
+
+The extension will pop up under the "Examples" section.
 
 ## Example Dataset
 
@@ -86,10 +92,14 @@ The example data was obtained from the [OpenfMRI databaset](https://openfmri.org
 
 
 ## Citation
+If you found it useful in your work please cite the paper:
 Anna Zapaishchykova, Divyanshu Tak, Aidan Boyd, Zezhong Ye, Hugo J.W.L. Aerts, Benjamin H. Kann
 "SegmentationReview: A Slicer3D extension for fast review of AI-generated segmentations"
 [https://doi.org/10.1016/j.simpa.2023.100536](https://doi.org/10.1016/j.simpa.2023.100536)
 
+
+## Current development branches
+If you want to check scans only without masks, clone and install [no-masks-dev](https://github.com/zapaishchykova/SegmentationReview/tree/no-masks-dev) branch. If you want automated centering on the masks (for example, useful when the segmentations are super small) clone [dev-centroid]([https://github.com/zapaishchykova/SegmentationReview/tree/no-masks-dev](https://github.com/zapaishchykova/SegmentationReview/tree/dev-centroid).
 
 ## License
 
