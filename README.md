@@ -84,7 +84,7 @@ This extension is available from the extensions marketplace starting v.5.3.0 (cu
 OR
 -  Navigate to "Developer tools"-> "Extension wizard" -> "Select extension" and point to the root of the cloned repo. 
 
-The extension will pop up under the "Examples" section.
+The extension will pop up under the Modules:"Examples" section.
 
 ## Example Dataset
 
