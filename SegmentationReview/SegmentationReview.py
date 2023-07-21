@@ -181,16 +181,27 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         else:
             self.current_df = pd.DataFrame(columns=['file', 'annotation'])
             self.current_index = 0
-        
+
         # count the number of files in the directory
-        for file in os.listdir(directory):
-            if ".nii" in file and "_mask" not in file:
-                self.n_files+=1
-                if os.path.exists(directory+"/"+file.split(".")[0]+"_mask.nii.gz"):
-                    self.nifti_files.append(directory+"/"+file)
-                    self.segmentation_files.append(directory+"/"+file.split(".")[0]+"_mask.nii.gz")
+        if os.path.exists(directory+"/mappings.csv"):
+            self.mappings = pd.read_csv(directory+"/mappings.csv")
+            print("Loaded mappings between files and masks")
+            for img, mask in zip(self.mappings["img_path"], self.mappings["mask_path"]):
+                if os.path.exists(img) and os.path.exists(mask):
+                    self.nifti_files.append(img)
+                    self.segmentation_files.append(mask)
+                    self.n_files+=1
                 else:
-                    print("No mask for file: ", file)
+                    print("File(s) not found: ", [i for i in [img, mask] if not os.path.exists(i)])
+        else:
+            for file in os.listdir(directory):
+                if ".nii" in file and "_mask" not in file:
+                    self.n_files+=1
+                    if os.path.exists(directory+"/"+file.split(".")[0]+"_mask.nii.gz"):
+                        self.nifti_files.append(directory+"/"+file)
+                        self.segmentation_files.append(directory+"/"+file.split(".")[0]+"_mask.nii.gz")
+                    else:
+                        print("No mask for file: ", file)
         self.ui.status_checked.setText("Checked: "+ str(self.current_index) + " / "+str(self.n_files-1))
          
         # load first file with mask

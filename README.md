@@ -46,18 +46,34 @@ The `annotation.csv` has a following structure (with no header):
 
 ## Tutorial
 
-1. **Prepare the dataset:** To get started, create a folder with the following file structure:
+1. **Prepare the dataset:** 
 
-    ```
-    - image1.nii.gz
-    - image1_mask.nii.gz
-    - image2.nii.gz
-    - image2_mask.nii.gz
-    ...
-    ```
-    The images should be in NIfTI format (`.nii.gz`), with corresponding segmentation masks labeled `_mask.nii.gz`.
+    - **Option 1 - Provide a mappings.csv file**
 
-An example dataset of T1w brain scans and their corresponding brain segmentations is provided in the `example_data` folder with already reviewed images. You can use this dataset to test the extension. If you want to review the images yourself, you can delete the `annotations.csv` file and start the review process from scratch.
+      Create a `mappings.csv` file in the inputs folder specifying the `img_path` and the respective `mask_path`. Se bellow an example of the content of this file:
+        ```
+        img_path,mask_path
+        data/1.nrrd,/path/to/respective/1_mask.nii.gz
+        data/2.nii.gz,/path/to/respective/2_mask.nii.gz
+        ...
+        ```
+      > :warning: The name of the file must be `mappings.csv` and the first line must contain the column names `img_path` and `mask_path`.
+
+    - **Option 2 - Structure the input data folder (only works for nifti)**
+
+      To get started, create a folder with the following file structure:
+
+        ```
+        - image1.nii.gz
+        - image1_mask.nii.gz
+        - image2.nii.gz
+        - image2_mask.nii.gz
+        ...
+        ```
+
+        The images should be in NIfTI format (`.nii.gz`), with corresponding segmentation masks labeled `_mask.nii.gz`.
+
+    An example dataset of T1w brain scans and their corresponding brain segmentations is provided in the `example_data` folder with already reviewed images. You can use this dataset to test the extension. If you want to review the images yourself, you can delete the `annotations.csv` file and start the review process from scratch.
 
 2. **Load the dataset into 3D Slicer:** After starting 3D Slicer, open `File -> Add Data` from the main menu, then select the folder containing the images and masks and press `OK`. After loading, you will see how many images are loaded under the _Checked_ status. If the path is opened for the first time, an `annotations.csv` file will be created in the same folder. This file will contain the results of the rating and will be automatically updated after each rating. Additionally, the `annotations.csv` file allows you to restore the annotation process in case of a crash or if there are too many images to rate in one session.
 
