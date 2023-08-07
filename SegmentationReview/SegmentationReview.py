@@ -154,18 +154,22 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
     
     def overwrite_mask_clicked(self):
         # overwrite self.segmentEditorWidget.segmentationNode()
-        print("Saved segmentation",self.segmentation_files[self.current_index].split("/")[-1].split(".")[0]+"_upd.nii.gz")
         #segmentation_node = slicer.mrmlScene.GetFirstNodeByClass('vtkMRMLSegmentationNode')
 
         # Get the file path where you want to save the segmentation node
         file_path = self.directory+"/t.seg.nrrd"
         # Save the segmentation node to file as nifti
-        file_path_nifti = self.directory+"/"+self.segmentation_files[self.current_index].split("/")[-1].split(".")[0]+"_upd.nii.gz"
+        file_path_nifti = self.segmentation_files[self.current_index].split(".")[0]+"_upd.nii.gz"
         # Save the segmentation node to file
         slicer.util.saveNode(self.segmentation_node, file_path)
         
         img = sitk.ReadImage(file_path)
         sitk.WriteImage(img, file_path_nifti)
+        print("Saved segmentation",file_path_nifti)
+
+    def _is_valid_extension(self, path):
+        return any(path.endswith(i) for i in [".nii", ".nii.gz", ".nrrd"])
+
     def onAtlasDirectoryChanged(self, directory):
         if self.volume_node:
             slicer.mrmlScene.RemoveNode(self.volume_node)
@@ -181,16 +185,27 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         else:
             self.current_df = pd.DataFrame(columns=['file', 'annotation'])
             self.current_index = 0
-        
+
         # count the number of files in the directory
-        for file in os.listdir(directory):
-            if ".nii" in file and "_mask" not in file:
-                self.n_files+=1
-                if os.path.exists(directory+"/"+file.split(".")[0]+"_mask.nii.gz"):
-                    self.nifti_files.append(directory+"/"+file)
-                    self.segmentation_files.append(directory+"/"+file.split(".")[0]+"_mask.nii.gz")
+        if os.path.exists(directory+"/mappings.csv"):
+            self.mappings = pd.read_csv(directory+"/mappings.csv")
+            print("Loaded mappings between files and masks")
+            for img, mask in zip(self.mappings["img_path"], self.mappings["mask_path"]):
+                if os.path.exists(img) and os.path.exists(mask) and self._is_valid_extension(img) and self._is_valid_extension(mask):
+                    self.nifti_files.append(img)
+                    self.segmentation_files.append(mask)
+                    self.n_files+=1
                 else:
-                    print("No mask for file: ", file)
+                    print("File(s) not found: ", [i for i in [img, mask] if not os.path.exists(i)])
+        else:
+            for file in os.listdir(directory):
+                if ".nii" in file and "_mask" not in file:
+                    self.n_files+=1
+                    if os.path.exists(directory+"/"+file.split(".")[0]+"_mask.nii.gz"):
+                        self.nifti_files.append(directory+"/"+file)
+                        self.segmentation_files.append(directory+"/"+file.split(".")[0]+"_mask.nii.gz")
+                    else:
+                        print("No mask for file: ", file)
         self.ui.status_checked.setText("Checked: "+ str(self.current_index) + " / "+str(self.n_files-1))
          
         # load first file with mask
@@ -212,7 +227,7 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
             
         self.likert_scores.append([self.current_index, likert_score, self.ui.comment.toPlainText()])
         # append data frame to CSV file
-        data = {'file': [self.nifti_files[self.current_index].split("/")[-1]], 'annotation': [likert_score],'comment': [self.ui.comment.toPlainText()]}
+        data = {'file': [self.nifti_files[self.current_index]], 'annotation': [likert_score],'comment': [self.ui.comment.toPlainText()]}
         df = pd.DataFrame(data)   
         df.to_csv(self.directory+"/annotations.csv", mode='a', index=False, header=False)
 
