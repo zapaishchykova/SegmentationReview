@@ -154,18 +154,18 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
     
     def overwrite_mask_clicked(self):
         # overwrite self.segmentEditorWidget.segmentationNode()
-        print("Saved segmentation",self.segmentation_files[self.current_index].split("/")[-1].split(".")[0]+"_upd.nii.gz")
         #segmentation_node = slicer.mrmlScene.GetFirstNodeByClass('vtkMRMLSegmentationNode')
 
         # Get the file path where you want to save the segmentation node
         file_path = self.directory+"/t.seg.nrrd"
         # Save the segmentation node to file as nifti
-        file_path_nifti = self.directory+"/"+self.segmentation_files[self.current_index].split("/")[-1].split(".")[0]+"_upd.nii.gz"
+        file_path_nifti = self.segmentation_files[self.current_index].split(".")[0]+"_upd.nii.gz"
         # Save the segmentation node to file
         slicer.util.saveNode(self.segmentation_node, file_path)
         
         img = sitk.ReadImage(file_path)
         sitk.WriteImage(img, file_path_nifti)
+        print("Saved segmentation",file_path_nifti)
     def onAtlasDirectoryChanged(self, directory):
         if self.volume_node:
             slicer.mrmlScene.RemoveNode(self.volume_node)
@@ -223,7 +223,7 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
             
         self.likert_scores.append([self.current_index, likert_score, self.ui.comment.toPlainText()])
         # append data frame to CSV file
-        data = {'file': [self.nifti_files[self.current_index].split("/")[-1]], 'annotation': [likert_score],'comment': [self.ui.comment.toPlainText()]}
+        data = {'file': [self.nifti_files[self.current_index]], 'annotation': [likert_score],'comment': [self.ui.comment.toPlainText()]}
         df = pd.DataFrame(data)   
         df.to_csv(self.directory+"/annotations.csv", mode='a', index=False, header=False)
 
