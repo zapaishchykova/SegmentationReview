@@ -166,6 +166,10 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         img = sitk.ReadImage(file_path)
         sitk.WriteImage(img, file_path_nifti)
         print("Saved segmentation",file_path_nifti)
+
+    def _is_valid_extension(self, path):
+        return any(path.endswith(i) for i in [".nii", ".nii.gz", ".nrrd"])
+
     def onAtlasDirectoryChanged(self, directory):
         if self.volume_node:
             slicer.mrmlScene.RemoveNode(self.volume_node)
@@ -187,7 +191,7 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
             self.mappings = pd.read_csv(directory+"/mappings.csv")
             print("Loaded mappings between files and masks")
             for img, mask in zip(self.mappings["img_path"], self.mappings["mask_path"]):
-                if os.path.exists(img) and os.path.exists(mask):
+                if os.path.exists(img) and os.path.exists(mask) and self._is_valid_extension(img) and self._is_valid_extension(mask):
                     self.nifti_files.append(img)
                     self.segmentation_files.append(mask)
                     self.n_files+=1
