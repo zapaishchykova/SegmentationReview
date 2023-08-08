@@ -4,6 +4,8 @@ The SegmentationReview extension is a powerful tool for clinicians who need to q
 
 One of the key benefits of SegmentationReview is the ability to load the entire dataset with all masks and volumes in one batch. This simplifies the workflow and eliminates the need to load masks and volumes separately. Additionally, the results of the review are saved as a csv file, which can be easily used for further analysis.
 
+NOTE: If you have not finished the review of all the masks in one go, feel free to close and resume the extension later on. The last annotated file would be restored from the annotations.csv file saved in the path. (That being said, this won't work if you annotated cases and then added new ones to the same folder. Keep new cases in the separate folder once you already started annotations to avoid conflicts)
+
 Overall, SegmentationReview provides a streamlined solution for clinicians who want to speed up the validation process of deep-learning generated segmentations. It is a valuable tool that can help to improve workflow efficiency and reduce the burden associated with segmentation validation.
 
 ## Installing the extension
@@ -116,6 +118,8 @@ Anna Zapaishchykova, Divyanshu Tak, Aidan Boyd, Zezhong Ye, Hugo J.W.L. Aerts, B
 
 ## Current development branches
 If you want to check scans only without masks, clone and install [no-masks-dev](https://github.com/zapaishchykova/SegmentationReview/tree/no-masks-dev) branch. If you want automated centering on the masks (for example, useful when the segmentations are super small) clone [dev-centroid]([https://github.com/zapaishchykova/SegmentationReview/tree/no-masks-dev](https://github.com/zapaishchykova/SegmentationReview/tree/dev-centroid).
+
+PRs are welcome!
 
 ## License
 
