@@ -9,6 +9,7 @@ from slicer.ScriptedLoadableModule import *
 from slicer.util import VTKObservationMixin
 import ctk
 import qt
+from datetime import datetime
 
 try:
     import pandas as pd
@@ -159,7 +160,7 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         # Get the file path where you want to save the segmentation node
         file_path = self.directory+"/t.seg.nrrd"
         # Save the segmentation node to file as nifti
-        file_path_nifti = self.segmentation_files[self.current_index].split(".")[0]+"_upd.nii.gz"
+        file_path_nifti = self.segmentation_files[self.current_index].split(".")[0]+f"_{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}.nii.gz"
         # Save the segmentation node to file
         slicer.util.saveNode(self.segmentation_node, file_path)
         
@@ -206,7 +207,7 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
                         self.segmentation_files.append(directory+"/"+file.split(".")[0]+"_mask.nii.gz")
                     else:
                         print("No mask for file: ", file)
-        self.ui.status_checked.setText("Checked: "+ str(self.current_index) + " / "+str(self.n_files-1))
+        self.ui.status_checked.setText("Checked: "+ str(self.current_index) + " / "+str(self.n_files))
          
         # load first file with mask
         self.load_nifti_file()
@@ -230,12 +231,12 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         data = {'file': [self.nifti_files[self.current_index]], 'annotation': [likert_score],'comment': [self.ui.comment.toPlainText()]}
         df = pd.DataFrame(data)   
         df.to_csv(self.directory+"/annotations.csv", mode='a', index=False, header=False)
+        self.ui.status_checked.setText("Checked: "+ str(self.current_index+1) + " / "+str(self.n_files))
 
         # go to the next file if there is one
         if self.current_index < self.n_files-1:
             self.current_index += 1
             self.load_nifti_file()
-            self.ui.status_checked.setText("Checked: "+ str(self.current_index) + " / "+str(self.n_files-1))
             self.ui.comment.setPlainText("")
         else:
             print("All files checked") 
