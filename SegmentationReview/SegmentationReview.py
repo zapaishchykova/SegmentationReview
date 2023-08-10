@@ -149,8 +149,14 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         self.segmentEditorWidget.setMRMLScene(slicer.mrmlScene)
         self.segmentEditorWidget.unorderedEffectsVisible = False
         self.segmentEditorWidget.setEffectNameOrder([
-            'Paint', 'Draw', 'Erase',
-        ])
+            'No editing','Threshold',
+            'Paint', 'Draw', 
+            'Erase','Level tracing',
+            'Grow from seeds','Fill between slices',
+            'Margin','Hollow',
+            'Smoothing','Scissors',
+            'Islands','Logical operators',
+            'Mask volume'])
         self.layout.addWidget(self.segmentEditorWidget)
     
     def overwrite_mask_clicked(self):
