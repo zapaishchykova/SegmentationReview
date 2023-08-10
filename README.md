@@ -48,20 +48,7 @@ The `annotation.csv` has a following structure (with no header):
 
 ## Tutorial
 
-1. **Prepare the dataset:** 
-
-    - **Option 1 - Provide a mappings.csv file**
-
-      Create a `mappings.csv` file in the inputs folder specifying the `img_path` and the respective `mask_path`. Se bellow an example of the content of this file:
-        ```
-        img_path,mask_path
-        data/1.nrrd,/path/to/respective/1_mask.nii.gz
-        data/2.nii.gz,/path/to/respective/2_mask.nii.gz
-        ...
-        ```
-      > :warning: The name of the file must be `mappings.csv` and the first line must contain the column names `img_path` and `mask_path`.
-
-    - **Option 2 - Structure the input data folder (only works for nifti)**
+1. **Prepare the dataset:Structure the input data folder (only works for nifti)**
 
       To get started, create a folder with the following file structure:
 
