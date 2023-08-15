@@ -77,7 +77,6 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         self.current_index=0
         self.likert_scores = []
         self.n_files = 0
-        self.current_df = None
 
     def setup(self):
         """
@@ -178,11 +177,11 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         return any(path.endswith(i) for i in [".nii", ".nii.gz", ".nrrd"])
 
     def onAtlasDirectoryChanged(self, directory):
-        if self.volume_node:
-            slicer.mrmlScene.RemoveNode(self.volume_node)
-        if self.segmentation_node:
+        try:
+            slicer.mrmlScene.RemoveNode(self.volume_node) 
             slicer.mrmlScene.RemoveNode(self.segmentation_node)
-
+        except:
+            pass
         self.directory = directory
         
         # load the .cvs file with the old annotations or create a new one
@@ -190,7 +189,6 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
             self.current_index = pd.read_csv(directory+"/annotations.csv").shape[0]+1
             print("Restored current index: ", self.current_index)
         else:
-            self.current_df = pd.DataFrame(columns=['file', 'annotation'])
             self.current_index = 0
 
         # count the number of files in the directory
@@ -252,7 +250,6 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         # Reset the slice views to clear any remaining segmentations
         slicer.util.resetSliceViews()
         
-        # ToDo: add 3d tumor view
         file_path = self.nifti_files[self.current_index]
         if self.volume_node:
             slicer.mrmlScene.RemoveNode(self.volume_node)
