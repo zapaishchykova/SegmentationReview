@@ -1,4 +1,4 @@
 img_path,mask_path
-example_dataset/sub-pixar007_T1w.nii.gz,example_dataset/sub-pixar007_T1w_mask.nii.gz
-example_dataset/sub-pixar008_T1w.nii.gz,example_dataset/sub-pixar008_T1w_mask.nii.gz
-example_dataset/sub-pixar009_T1w.nii.gz,example_dataset/sub-pixar009_T1w_mask.nii.gz
+sub-pixar007_T1w/sub-pixar007_T1w.nii.gz,sub-pixar007_T1w/sub-pixar007_T1w_mask.nii.gz
+sub-pixar008_T1w/sub-pixar008_T1w.nii.gz,sub-pixar008_T1w/sub-pixar008_T1w_mask.nii.gz
+sub-pixar009_T1w.nii.gz,sub-pixar009_T1w_mask.nii.gz

@@ -170,6 +170,13 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
 
     def _is_valid_extension(self, path):
         return any(path.endswith(i) for i in [".nii", ".nii.gz", ".nrrd"])
+    
+    def _construct_full_path(self, path):
+        if os.path.isabs(path):
+            return path
+        else:
+            return os.path.join(self.directory, path)
+
 
     def onAtlasDirectoryChanged(self, directory):
         if self.volume_node:
@@ -192,6 +199,8 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
             self.mappings = pd.read_csv(directory+"/mappings.csv")
             print("Loaded mappings between files and masks")
             for img, mask in zip(self.mappings["img_path"], self.mappings["mask_path"]):
+                img = self._construct_full_path(img)
+                mask = self._construct_full_path(mask)
                 if os.path.exists(img) and os.path.exists(mask) and self._is_valid_extension(img) and self._is_valid_extension(mask):
                     self.nifti_files.append(img)
                     self.segmentation_files.append(mask)
@@ -210,7 +219,10 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         self.ui.status_checked.setText("Checked: "+ str(self.current_index) + " / "+str(self.n_files))
          
         # load first file with mask
-        self.load_nifti_file()
+        if self.current_index < self.n_files:
+            self.load_nifti_file()
+        else:
+            print("All the files in this folder are annotated. Choose another location, add more files to the mappings.csv file, or delete the annotations.csv, in case you want to re-annotate these from scratch.")
         
     def save_and_next_clicked(self):
         likert_score = 0
