@@ -1,0 +1,3 @@
+sub-pixar009_T1w.nii.gz,Acceptable with no changes,,sub-pixar009_T1w_mask.nii.gz,Mask loaded
+sub-pixar008_T1w.nii.gz,Unacceptable and not visible,,sub-pixar008_T1w_mask.nii.gz,Mask loaded
+sub-pixar007_T1w.nii.gz,Acceptable with minor changes,,,No mask

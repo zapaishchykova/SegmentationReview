@@ -10,6 +10,7 @@ import ctk
 import qt
 from datetime import datetime
 import SegmentStatistics
+import logging
 
 try:
     import pandas as pd
@@ -26,6 +27,7 @@ except:
 #
 # SegmentationReview
 #
+
 
 class SegmentationReview(ScriptedLoadableModule):
     """Uses ScriptedLoadableModule base class, available at:
@@ -47,7 +49,7 @@ It is important that each nii file has a corresponding mask file with the same n
         self.parent.acknowledgementText = """
 This file was developed by Anna Zapaishchykova and Vasco Prudente. 
 """
-
+       
 
 #
 # SegmentationReviewWidget
@@ -207,6 +209,14 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         return unchecked_files, unchecked_masks, statuses
     
     def onAtlasDirectoryChanged(self, directory):
+        logger = logging.getLogger('SegmentationReview')
+        logger.setLevel(logging.DEBUG)
+
+        # Set up logging to file
+        fileHandler = logging.FileHandler(directory+'/segmentation_review.log')
+        fileHandler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
+        logger.addHandler(fileHandler) 
+        
         try:
             slicer.mrmlScene.RemoveNode(self.volume_node) 
             slicer.mrmlScene.RemoveNode(self.segmentation_node)
@@ -216,6 +226,7 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         
         # case 1: mapper cvs is present
         if os.path.exists(directory+"/mapping.csv"):
+            logger.info('Found mappings between files and masks') 
             print("Found mappings between files and masks")
             self.mappings = pd.read_csv(directory+"/mapping.csv")
             self.with_mapper_flag = True
@@ -234,21 +245,28 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
                         if os.path.exists(directory+"/"+mask) and self._is_valid_extension(directory+"/"+mask):
                             self.segmentation_files.append(directory+"/"+mask)
                             self.seg_mask_status.append(2) # 0 - no mask, 1 - mask path, cannot load , 2 - mask loaded
+                            logger.info(f'Found mask for {img}')
                         elif self._is_valid_extension(directory+"/"+mask) and not os.path.exists(directory+"/"+mask):
                             self.segmentation_files.append("")
                             self.seg_mask_status.append(1) # 0 - no mask, 1 - mask path, cannot load , 2 - mask loaded
+                            logger.info(f'Cannot load mask for {img}, check path')
                         else:
                             self.segmentation_files.append("")
                             self.seg_mask_status.append(0) # 0 - no mask, 1 - mask path, cannot load , 2 - mask loaded
+                            logger.info(f'No mask provided for {img}')
                     else:
                         self.segmentation_files.append("")
                         self.seg_mask_status.append(0)
+                        logger.info(f'No mask provided for {img}')
+                else:
+                    logger.info(f'File {img} does not exist or has wrong extension, skipping')
                         
                             
                 # ToDo: write to log how many files were found, how many masks were found 
                 
         # case 2: mapper cvs is not present; list files from file
         else:
+            logger.info('No mappings between files and masks') 
             print("No mappings between files and masks")
             for file in os.listdir(directory):
                 if ".nii" in file and "_mask" not in file:
@@ -257,23 +275,30 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
                     if os.path.exists(directory+"/"+file.split(".")[0]+"_mask.nii.gz"):
                         self.segmentation_files.append(directory+"/"+file.split(".")[0]+"_mask.nii.gz")
                         self.seg_mask_status.append(2) # 0 - no mask, 1 - mask path, cannot load , 2 - mask loaded
+                        logger.info(f'Found mask for {file}')
                     else:
                         self.segmentation_files.append("")
                         self.seg_mask_status.append(0) # 0 - no mask, 1 - mask path, cannot load , 2 - mask loaded
+                        logger.info(f'No mask for {file}')
+                else:
+                    logger.info(f'File {file} does not exist or has wrong extension, skipping')
                         
         self.current_index = 0               
         # load the .cvs file with the old annotations or create a new one
         if os.path.exists(directory+"/annotations.csv"):
-            print("Found session, restoring annotations")
             ann_csv = pd.read_csv(directory+"/annotations.csv", header=None,index_col=False, names=["file","annotation","comment","mask_path","mask_status"])
             self.nifti_files, self.segmentation_files,self.seg_mask_status = self._restore_index(ann_csv, self.nifti_files,
                                                                                                  self.segmentation_files, self.seg_mask_status)
-            print("Restored session")
+            
+            print("Found session, restoring annotations")
+            logger.info(f'Found session, restoring annotations {len(self.nifti_files)} files left') 
+            
         self.n_files = len(self.nifti_files)
         self.ui.status_checked.setText("Checked: "+ str(self.current_index) + " / "+str(self.n_files))
-         
+        
         print("Images:",len(self.nifti_files), 
               "Masks:",len(self.segmentation_files))
+        logger.info( f'Total Images Loaded: {len(self.nifti_files)}, Images with Masks: {len(self.segmentation_files)}')
         # load first file with mask
         self.load_nifti_file()
      

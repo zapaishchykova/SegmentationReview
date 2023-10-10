@@ -6,7 +6,7 @@ __pycache__/
 .Rhistory
 # C extensions
 *.so
-
+*.log
 # Distribution / packaging
 .Python
 build/
