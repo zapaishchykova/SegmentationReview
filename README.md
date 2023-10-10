@@ -84,7 +84,6 @@ This is a more flexible option that allows to map the filenames in the folder to
 
 Create a mapping.csv with the following structure (with header):
 ```
-```
 img_path,mask_path
 sub-pixar008_T1w/sub-pixar008_T1w.nii.gz,sub-pixar008_T1w/sub-pixar008_T1w_mask.nii.gz
 sub-pixar009_T1w.nii.gz,sub-pixar009_T1w_mask.nii.gz
