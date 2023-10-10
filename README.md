@@ -16,9 +16,9 @@ Anna Zapaishchykova, Divyanshu Tak, Aidan Boyd, Zezhong Ye, Hugo J.W.L. Aerts, B
 [https://doi.org/10.1016/j.simpa.2023.100536](https://doi.org/10.1016/j.simpa.2023.100536)
 
 
-## Installing the extension
+## Installing the extension (stable version)
 
-You can install `SegmentationReview` from the 3D Slicer [extensions manager](https://slicer.readthedocs.io/en/latest/user_guide/extensions_manager.html).
+You can install `SegmentationReview` from the 3D Slicer [extensions manager](https://slicer.readthedocs.io/en/latest/user_guide/extensions_manager.html) from version 5.3.0.
 
 To open the extension manager, go to `View -> Extensions Manager` in the main menu. In the extensions manager, search for `SegmentationReview` and click  `Install` to install the extension. Once the extension is installed, switch to the `SegmentationReview` module by clicking `Modules -> SegmentationReview` in the main menu.
 
@@ -56,22 +56,24 @@ The `annotation.csv` has a following structure (with no header):
 - "Mask_status" (5th column) has the following encoding: (2) Mask loaded, (1) Cannot load mask  and (0) No mask
 
 ## Tutorial
-**OPTION 1: NO mapping file**
+### OPTION 1: NO mapping file
+
 1. **Prepare the dataset:Structure the input data folder (only works for nifti)**
 
-      To get started, create a folder with the following file structure:
+To get started, create a folder with the following file structure:
 
-        ```
-        - image1.nii.gz
-        - image1_mask.nii.gz
-        - image2.nii.gz
-        - image2_mask.nii.gz
-        ...
-        ```
+```
+- image1.nii.gz
+- image1_mask.nii.gz
+- image2.nii.gz
+- image2_mask.nii.gz
+- image3.nii.gz
+...
+```
 
-        The images should be in NIfTI format (`.nii.gz`), with corresponding segmentation masks labeled `_mask.nii.gz`. If masks are not available, you can still use the extension (images would be loaded for review without the mask), but you will not be able to edit the masks.
+The images should be in NIfTI format (`.nii.gz`), with corresponding segmentation masks labeled `_mask.nii.gz`. If masks are not available, you can still use the extension (images would be loaded for review without the mask), but you will not be able to edit the masks.
 
-    An example dataset of T1w brain scans and their corresponding brain segmentations is provided in the `example_dataset_no_mapping` folder with already reviewed images. You can use this dataset to test the extension. 
+An example dataset of T1w brain scans and their corresponding brain segmentations is provided in the `example_dataset_no_mapping` folder with already reviewed images. You can use this dataset to test the extension. 
     
 
 2. **Load the dataset into 3D Slicer:** After starting 3D Slicer, open `File -> Add Data` from the main menu, then select the folder containing the images and masks and press `OK`. After loading, you will see how many images are loaded under the _Checked_ status. If the path is opened for the first time, an `annotations.csv` file will be created in the same folder. This file will contain the results of the rating and will be automatically updated after each rating. Additionally, the `annotations.csv` file allows you to **restore** the annotation process in case of a crash or if there are too many images to rate in one session.
@@ -80,7 +82,8 @@ The `annotation.csv` has a following structure (with no header):
 
 4. **Optional: Edit the mask of an image:** If you want to change the segmentation mask of any image, you can use the "Segment Editor" module that is added to the extension. Select the `Segment editor` tab, edit the mask using the brushes or eraser, and then click `Overwrite edited mask` to save the new mask. The new mask will be saved in the same folder as the original mask, with timestamp added to the end of the name of mask.
 
-**OPTION 2: with mapping.csv file**
+### OPTION 2: with mapping.csv file
+
 This is a more flexible option that allows to map the filenames in the folder to the filenames in the mapping file. This is useful when the filenames in the folder are not the same as in the mapping file. 
 
 Create a mapping.csv with the following structure (with header):
@@ -126,7 +129,8 @@ The example data was obtained from the [OpenfMRI databaset](https://openfmri.org
 - [ ] Add notification that all images are rated/ask if you want to continue
 - [ ] Remove writing of extra file t.seg.nrrd when 3D segmentation is edited
 
-## Updates:
+## Updates
+Version available in 3D Slicer 5.3.0-5.5.0 marketplace does not include "no masks" support. Updated version with no mask support, mapper.csv and centering of masks is available for 3D Slicer 5.5.1 and later.
 - 2023-10-10: Added the option to load the dataset with mapping.csv file. This is useful when the filenames in the folder are not the same as in the mapping file.
 - 2023-10-10: Added the option to load the dataset without masks. This is useful when the masks are not available or if you need to check images only.
 - 2023-10-10: Added the option to automatically center the image on the mask. This is useful when the masks are super small and you want to see them in the center of the image. Note: it works only if the mask is loaded.
