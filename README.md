@@ -123,6 +123,7 @@ The example data was obtained from the [OpenfMRI databaset](https://openfmri.org
 - [ ] Add support for multiple masks per image (currently only one mask per image is supported, although you can have a workaround by merging masks into one file OR using mapping.csv file with multiple masks per image)
 - [ ] Add support for multiple raters (currently only one rater is supported)
 - [ ] Add notification that all images are rated/ask if you want to continue
+- [ ] Remove writing of extra file t.seg.nrrd when 3D segmentation is edited
 
 ## Updates:
 - 2023-10-10: Added the option to load the dataset with mapping.csv file. This is useful when the filenames in the folder are not the same as in the mapping file.
