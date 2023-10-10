@@ -1,7 +1,6 @@
 import logging
 import os
 
-
 import vtk
 import pathlib
 import slicer
@@ -10,6 +9,7 @@ from slicer.util import VTKObservationMixin
 import ctk
 import qt
 from datetime import datetime
+import SegmentStatistics
 
 try:
     import pandas as pd
@@ -37,7 +37,7 @@ class SegmentationReview(ScriptedLoadableModule):
         self.parent.title = "SegmentationReview"  
         self.parent.categories = ["Examples"]  
         self.parent.dependencies = []  
-        self.parent.contributors = ["Anna Zapaishchykova (BWH), Dr. Benjamin H. Kann, AIM-Harvard"]  
+        self.parent.contributors = ["Anna Zapaishchykova, Vasco Prudente, Dr. Benjamin H. Kann (AIM-Harvard)"]  
         self.parent.helpText = """
 Slicer3D extension for rating using Likert-type score Deep-learning generated segmentations, with segment editor funtionality. 
 Created to speed up the validation process done by a clinician - the dataset loads in one batch with no need to load masks and volumes separately.
@@ -45,7 +45,7 @@ It is important that each nii file has a corresponding mask file with the same n
 """
        
         self.parent.acknowledgementText = """
-This file was developed by Anna Zapaishchykova, BWH. 
+This file was developed by Anna Zapaishchykova and Vasco Prudente. 
 """
 
 
@@ -77,6 +77,8 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         self.current_index=0
         self.likert_scores = []
         self.n_files = 0
+        self.seg_mask_status = [] # 0 - no mask, 1 - mask path, cannot load , 2 - mask loaded
+        self.with_mapper_flag = False
 
     def setup(self):
         """
@@ -175,7 +177,35 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
 
     def _is_valid_extension(self, path):
         return any(path.endswith(i) for i in [".nii", ".nii.gz", ".nrrd"])
+    
+    def _construct_full_path(self, path):
+        if os.path.isabs(path):
+            return path
+        else:
+            return os.path.join(self.directory, path)
+    
+    def _restore_index(self, ann_csv, files_list, mask_list, mask_status_list=None):
+        #ann_csv {[self.nifti_files[self.current_index]],[likert_score],[self.ui.comment.toPlainText()]}
+        statuses,unchecked_files,unchecked_masks = [],[],[]
+        list_of_checked = ann_csv['file'].values
+        list_of_checked = [self._construct_full_path(i) for i in list_of_checked]
+        
+        list_of_checked_masks = ann_csv['mask_path'].values
+        list_of_checked_masks = [self._construct_full_path(i) for i in list_of_checked_masks]
+        
+        #find subset of files that are not checked
+        unchecked_files = [i for i in files_list if i not in list_of_checked] 
+        
+        for i in range(len(mask_list)):
+            if mask_list[i] not in list_of_checked_masks:
+                unchecked_masks.append(mask_list[i])
+                statuses.append(mask_status_list[i])
+        #unchecked_files = [i for i in files_list if i not in list_of_checked] 
+        #unchecked_masks = [i for i in mask_list if i not in list_of_checked_masks] 
 
+        #return list of unchecked files
+        return unchecked_files, unchecked_masks, statuses
+    
     def onAtlasDirectoryChanged(self, directory):
         try:
             slicer.mrmlScene.RemoveNode(self.volume_node) 
@@ -184,38 +214,78 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
             pass
         self.directory = directory
         
-        # load the .cvs file with the old annotations or create a new one
-        if os.path.exists(directory+"/annotations.csv"):
-            self.current_index = pd.read_csv(directory+"/annotations.csv").shape[0]+1
-            print("Restored current index: ", self.current_index)
-        else:
-            self.current_index = 0
-
-        # count the number of files in the directory
-        if os.path.exists(directory+"/mappings.csv"):
-            self.mappings = pd.read_csv(directory+"/mappings.csv")
+        # case 1: mapper cvs is present
+        if os.path.exists(directory+"/mapping.csv"):
+            print("Found mappings between files and masks")
+            self.mappings = pd.read_csv(directory+"/mapping.csv")
+            self.with_mapper_flag = True
+            # casting to zero all nan values
+            
             print("Loaded mappings between files and masks")
             for img, mask in zip(self.mappings["img_path"], self.mappings["mask_path"]):
-                if os.path.exists(img) and os.path.exists(mask) and self._is_valid_extension(img) and self._is_valid_extension(mask):
-                    self.nifti_files.append(img)
-                    self.segmentation_files.append(mask)
-                    self.n_files+=1
-                else:
-                    print("File(s) not found: ", [i for i in [img, mask] if not os.path.exists(i)])
+                # counting images
+                print(directory+"/"+img,mask)
+                print(os.path.exists(directory+"/"+img), self._is_valid_extension(directory+"/"+img))
+                if os.path.exists(directory+"/"+img) and self._is_valid_extension(directory+"/"+img):
+                    self.nifti_files.append(directory+"/"+img)
+                    # counting masks
+                    # check if mask is 
+                    if type(mask) == str:
+                        if os.path.exists(directory+"/"+mask) and self._is_valid_extension(directory+"/"+mask):
+                            self.segmentation_files.append(directory+"/"+mask)
+                            self.seg_mask_status.append(2) # 0 - no mask, 1 - mask path, cannot load , 2 - mask loaded
+                        elif self._is_valid_extension(directory+"/"+mask) and not os.path.exists(directory+"/"+mask):
+                            self.segmentation_files.append("")
+                            self.seg_mask_status.append(1) # 0 - no mask, 1 - mask path, cannot load , 2 - mask loaded
+                        else:
+                            self.segmentation_files.append("")
+                            self.seg_mask_status.append(0) # 0 - no mask, 1 - mask path, cannot load , 2 - mask loaded
+                    else:
+                        self.segmentation_files.append("")
+                        self.seg_mask_status.append(0)
+                        
+                            
+                # ToDo: write to log how many files were found, how many masks were found 
+                
+        # case 2: mapper cvs is not present; list files from file
         else:
+            print("No mappings between files and masks")
             for file in os.listdir(directory):
                 if ".nii" in file and "_mask" not in file:
-                    self.n_files+=1
+                    
+                    self.nifti_files.append(directory+"/"+file)
                     if os.path.exists(directory+"/"+file.split(".")[0]+"_mask.nii.gz"):
-                        self.nifti_files.append(directory+"/"+file)
                         self.segmentation_files.append(directory+"/"+file.split(".")[0]+"_mask.nii.gz")
+                        self.seg_mask_status.append(2) # 0 - no mask, 1 - mask path, cannot load , 2 - mask loaded
                     else:
-                        print("No mask for file: ", file)
+                        self.segmentation_files.append("")
+                        self.seg_mask_status.append(0) # 0 - no mask, 1 - mask path, cannot load , 2 - mask loaded
+                        
+        self.current_index = 0               
+        # load the .cvs file with the old annotations or create a new one
+        if os.path.exists(directory+"/annotations.csv"):
+            print("Found session, restoring annotations")
+            ann_csv = pd.read_csv(directory+"/annotations.csv", header=None,index_col=False, names=["file","annotation","comment","mask_path","mask_status"])
+            self.nifti_files, self.segmentation_files,self.seg_mask_status = self._restore_index(ann_csv, self.nifti_files,
+                                                                                                 self.segmentation_files, self.seg_mask_status)
+            print("Restored session")
+        self.n_files = len(self.nifti_files)
         self.ui.status_checked.setText("Checked: "+ str(self.current_index) + " / "+str(self.n_files))
          
+        print("Images:",len(self.nifti_files), 
+              "Masks:",len(self.segmentation_files))
         # load first file with mask
         self.load_nifti_file()
-        
+     
+    def _numerical_status_to_str(self, status):
+        return {0: "No mask", 1: "Cannot load mask", 2: "Mask loaded"}[status]   
+    
+    def _rating_to_str(self, rating):
+        return {1: "Acceptable with no changes", 2: "Acceptable with minor changes", 
+                3: "Unacceptable with major changes", 
+                4: "Unacceptable and not visible",
+                5: "Bad images"}[rating]  
+    
     def save_and_next_clicked(self):
         likert_score = 0
         if self.ui.radioButton_1.isChecked():
@@ -232,7 +302,11 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
             
         self.likert_scores.append([self.current_index, likert_score, self.ui.comment.toPlainText()])
         # append data frame to CSV file
-        data = {'file': [self.nifti_files[self.current_index]], 'annotation': [likert_score],'comment': [self.ui.comment.toPlainText()]}
+        data = {'file': [self.nifti_files[self.current_index].replace(self.directory+"/","")],
+                    'annotation': [self._rating_to_str(likert_score)],
+                    'comment': [self.ui.comment.toPlainText()],
+                    'mask_path': [self.segmentation_files[self.current_index].replace(self.directory+"/","")],
+                    'mask_status': [self._numerical_status_to_str(self.seg_mask_status[self.current_index])]}
         df = pd.DataFrame(data)   
         df.to_csv(self.directory+"/annotations.csv", mode='a', index=False, header=False)
         self.ui.status_checked.setText("Checked: "+ str(self.current_index+1) + " / "+str(self.n_files))
@@ -258,24 +332,46 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
 
         self.volume_node = slicer.util.loadVolume(file_path)
         slicer.app.applicationLogic().PropagateVolumeSelection(0)
-
-        segmentation_file_path = self.segmentation_files[self.current_index]
-        self.segmentation_node = slicer.util.loadSegmentation(segmentation_file_path)
-        self.segmentation_node.GetDisplayNode().SetColor(self.segmentation_color)
-        self.set_segmentation_and_mask_for_segmentation_editor()        
+        try:
+            segmentation_file_path = self.segmentation_files[self.current_index]
+            self.segmentation_node = slicer.util.loadSegmentation(segmentation_file_path)
+            self.segmentation_node.GetDisplayNode().SetColor(self.segmentation_color)
+            self.set_segmentation_and_mask_for_segmentation_editor() 
+        except:
+            print("no mask")       
         
-        print(file_path,segmentation_file_path)
-
+        print(file_path)
 
     def set_segmentation_and_mask_for_segmentation_editor(self):
         slicer.app.processEvents()
         self.segmentEditorWidget.setMRMLScene(slicer.mrmlScene)
         segmentEditorNode = slicer.vtkMRMLSegmentEditorNode()
+        
+        #get segmentation node center and jump to it
+        # this requires QuantitativeReporting installed
+        # https://qiicr.gitbook.io/quantitativereporting-guide/user-guide/installation-and-upgrade
+       
+        segmentationNode = slicer.mrmlScene.GetFirstNodeByClass("vtkMRMLSegmentationNode")
+        #segmentationNode = segNode.GetSegmentation().GetNthSegment(0)
+
+        # Compute centroids
+        segStatLogic = SegmentStatistics.SegmentStatisticsLogic()
+        segStatLogic.getParameterNode().SetParameter("Segmentation", segmentationNode.GetID())
+        segStatLogic.getParameterNode().SetParameter("LabelmapSegmentStatisticsPlugin.centroid_ras.enabled", str(True))
+        segStatLogic.computeStatistics()
+        stats = segStatLogic.getStatistics()
+        pointListNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsFiducialNode")
+        pointListNode.CreateDefaultDisplayNodes()
+        for segmentId in stats["SegmentIDs"]:
+            centroid_ras = stats[segmentId,"LabelmapSegmentStatisticsPlugin.centroid_ras"]
+            print(segmentId,centroid_ras)
+            markupsLogic = slicer.modules.markups.logic()
+            markupsLogic.JumpSlicesToLocation(centroid_ras[0],centroid_ras[1],centroid_ras[2], False)
+
         slicer.mrmlScene.AddNode(segmentEditorNode)
         self.segmentEditorWidget.setMRMLSegmentEditorNode(segmentEditorNode)
         self.segmentEditorWidget.setSegmentationNode(self.segmentation_node)
-        self.segmentEditorWidget.setMasterVolumeNode(self.volume_node)
-
+        self.segmentEditorWidget.setSourceVolumeNode(self.volume_node)
 
     def cleanup(self):
         """
@@ -311,6 +407,8 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         # If this module is shown while the scene is closed then recreate a new parameter node immediately
         if self.parent.isEntered:
             self.initializeParameterNode()
+        #clear the scene
+        slicer.mrmlScene.Clear(0)
 
     def initializeParameterNode(self):
         """
@@ -376,7 +474,6 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         wasModified = self._parameterNode.StartModify()  # Modify all properties in a single batch
 
         self._parameterNode.EndModify(wasModified)
-
 
 #
 # SlicerLikertDLratingLogic
