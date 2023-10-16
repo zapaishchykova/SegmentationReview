@@ -8,7 +8,7 @@ NOTE: If you have not finished the review of all the masks in one go, feel free 
 
 Overall, SegmentationReview provides a streamlined solution for clinicians who want to speed up the validation process of deep-learning generated segmentations. It is a valuable tool that can help to improve workflow efficiency and reduce the burden associated with segmentation validation.
 
-Note: available for 3D Slicer 5.3.0 marketplace and later. Updated version with no mask support, mapper.csv and centering of masks is available for 3D Slicer 5.5.1 and later.
+Note: available for 3D Slicer 5.3.0 marketplace and later. Updated version with no mask support, mapper.csv and centering of masks is available in 3D Slicer 5.5.0 (currently preview version) and later.
 ## Citation
 If you found it useful in your work please cite the paper:
 Anna Zapaishchykova, Divyanshu Tak, Aidan Boyd, Zezhong Ye, Hugo J.W.L. Aerts, Benjamin H. Kann
