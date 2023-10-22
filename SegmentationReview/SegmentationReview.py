@@ -194,23 +194,15 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         
         list_of_checked_masks = ann_csv['mask_path'].values
         # check if ['mask_path'] is empty
-        if type(list_of_checked_masks[0]) != str:
-            list_of_checked_masks = ["" for i in range(len(list_of_checked))]
-        else:
+        if type(list_of_checked_masks[0]) == str:
             list_of_checked_masks = [self._construct_full_path(i) for i in list_of_checked_masks]
         
         #find subset of files that are not checked
-        unchecked_files = [i for i in files_list if i not in list_of_checked] 
-        
-        if mask_status_list is None:
-            mask_status_list = [0 for i in range(len(mask_list))]
-        else:
-            for i in range(len(mask_list)):
-                if mask_list[i] not in list_of_checked_masks:
-                    unchecked_masks.append(mask_list[i])
-                    statuses.append(mask_status_list[i])
-            #unchecked_files = [i for i in files_list if i not in list_of_checked] 
-            #unchecked_masks = [i for i in mask_list if i not in list_of_checked_masks] 
+        for i in range(len(files_list)):
+            if files_list[i] not in list_of_checked:
+                unchecked_files.append(files_list[i])
+                unchecked_masks.append(mask_list[i])
+                statuses.append(mask_status_list[i])
 
         #return list of unchecked files
         return unchecked_files, unchecked_masks, statuses
@@ -292,6 +284,7 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         self.current_index = 0               
         # load the .cvs file with the old annotations or create a new one
         if os.path.exists(directory+"/annotations.csv"):
+            print(self.nifti_files,self.segmentation_files, self.seg_mask_status)
             ann_csv = pd.read_csv(directory+"/annotations.csv", header=None,index_col=False, names=["file","annotation","comment","mask_path","mask_status"])
             self.nifti_files, self.segmentation_files,self.seg_mask_status = self._restore_index(ann_csv, self.nifti_files,
                                                                                                  self.segmentation_files, self.seg_mask_status)
