@@ -193,17 +193,24 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         list_of_checked = [self._construct_full_path(i) for i in list_of_checked]
         
         list_of_checked_masks = ann_csv['mask_path'].values
-        list_of_checked_masks = [self._construct_full_path(i) for i in list_of_checked_masks]
+        # check if ['mask_path'] is empty
+        if type(list_of_checked_masks[0]) != str:
+            list_of_checked_masks = ["" for i in range(len(list_of_checked))]
+        else:
+            list_of_checked_masks = [self._construct_full_path(i) for i in list_of_checked_masks]
         
         #find subset of files that are not checked
         unchecked_files = [i for i in files_list if i not in list_of_checked] 
         
-        for i in range(len(mask_list)):
-            if mask_list[i] not in list_of_checked_masks:
-                unchecked_masks.append(mask_list[i])
-                statuses.append(mask_status_list[i])
-        #unchecked_files = [i for i in files_list if i not in list_of_checked] 
-        #unchecked_masks = [i for i in mask_list if i not in list_of_checked_masks] 
+        if mask_status_list is None:
+            mask_status_list = [0 for i in range(len(mask_list))]
+        else:
+            for i in range(len(mask_list)):
+                if mask_list[i] not in list_of_checked_masks:
+                    unchecked_masks.append(mask_list[i])
+                    statuses.append(mask_status_list[i])
+            #unchecked_files = [i for i in files_list if i not in list_of_checked] 
+            #unchecked_masks = [i for i in mask_list if i not in list_of_checked_masks] 
 
         #return list of unchecked files
         return unchecked_files, unchecked_masks, statuses
@@ -269,8 +276,7 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
             logger.info('No mappings between files and masks') 
             print("No mappings between files and masks")
             for file in os.listdir(directory):
-                if ".nii" in file and "_mask" not in file:
-                    
+                if ".nii" in file and "_mask" not in file:  
                     self.nifti_files.append(directory+"/"+file)
                     if os.path.exists(directory+"/"+file.split(".")[0]+"_mask.nii.gz"):
                         self.segmentation_files.append(directory+"/"+file.split(".")[0]+"_mask.nii.gz")
