@@ -1,0 +1,7 @@
+subj_id,img_path,mask_path
+sub-pixar008,sub-pixar008_T1w/sub-pixar008_T1w.nii.gz,
+sub-pixar008,sub-pixar008_sag_T1w.nii.gz,
+sub-pixar0010,sub-pixar0010_T1w0.nii.gz,
+sub-pixar0010,sub-pixar0010_T1w1.nii.gz,
+sub-pixar0010,sub-pixar0010_T1w2.nii.gz,
+sub-pixar009_T1w.nii.gz,sub-pixar009_T1w.nii.gz,
