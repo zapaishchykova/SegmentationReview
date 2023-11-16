@@ -58,7 +58,7 @@ The `annotation.csv` has a following structure (with no header):
 
 ## Tutorial
 <p align="center">
-  <img width="50%" src="pics/diagram.png" alt="Diagrams">
+  <img width="100%" src="pics/diagram.png" alt="Diagrams">
 </p>
 
 ### OPTION 1: NO mapping file, the easiest option
