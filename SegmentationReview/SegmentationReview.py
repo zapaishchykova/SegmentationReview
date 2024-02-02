@@ -256,12 +256,15 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
             return os.path.join(self.directory, path)
     
     def _restore_index(self, ann_csv, files_list, mask_list, mask_status_list=None):
+        print(files_list,mask_list)
+        print(self.unique_case_flag)
         #ann_csv {[self.nifti_files[self.current_index]],[likert_score],[self.ui.comment.toPlainText()]}
         statuses, unchecked_files, unchecked_masks, checked_ids, id_subs_list = [], [], [], [], []
         list_of_checked = ann_csv['file'].values
         list_of_checked = [self._construct_full_path(i) for i in list_of_checked]
         
         list_of_checked_masks = ann_csv['mask_path'].values
+        print(list_of_checked)
         # check if ['mask_path'] is empty
         if type(list_of_checked_masks[0]) == str:
             list_of_checked_masks = [self._construct_full_path(i) for i in list_of_checked_masks]
@@ -410,16 +413,16 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
             #print("Loaded mappings between files and masks")
             for img, mask in zip(self.mappings["img_path"], self.mappings["mask_path"]):
                 # counting images
-                if os.path.exists(directory+"/"+img) and self._is_valid_extension(directory+"/"+img):
-                    self.nifti_files.append(directory+"/"+img)
+                if os.path.exists(os.path.join(directory,img)) and self._is_valid_extension(os.path.join(directory,img)):
+                    self.nifti_files.append(os.path.join(directory,img))
                     # counting masks
                     # check if mask is 
                     if type(mask) == str:
-                        if os.path.exists(directory+"/"+mask) and self._is_valid_extension(directory+"/"+mask):
-                            self.segmentation_files.append(directory+"/"+mask)
+                        if os.path.exists(os.path.join(directory,mask)) and self._is_valid_extension(os.path.join(directory,mask)):
+                            self.segmentation_files.append(os.path.join(directory,mask))
                             self.seg_mask_status.append(2) # 0 - no mask, 1 - mask path, cannot load , 2 - mask loaded
                             logger.info(f'Found mask for {img}')
-                        elif self._is_valid_extension(directory+"/"+mask) and not os.path.exists(directory+"/"+mask):
+                        elif self._is_valid_extension(os.path.join(directory,mask)) and not os.path.exists(os.path.join(directory,mask)):
                             self.segmentation_files.append("")
                             self.seg_mask_status.append(1) # 0 - no mask, 1 - mask path, cannot load , 2 - mask loaded
                             logger.info(f'Cannot load mask for {img}, check path')
@@ -442,9 +445,9 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
             #print("No mappings between files and masks")
             for file in os.listdir(directory):
                 if ".nii" in file and "_mask" not in file:  
-                    self.nifti_files.append(directory+"/"+file)
-                    if os.path.exists(directory+"/"+file.split(".")[0]+"_mask.nii.gz"):
-                        self.segmentation_files.append(directory+"/"+file.split(".")[0]+"_mask.nii.gz")
+                    self.nifti_files.append(os.path.join(directory,file)) #
+                    if os.path.exists(os.path.join(directory,file.split(".")[0]+"_mask.nii.gz")):
+                        self.segmentation_files.append(os.path.join(directory,file.split(".")[0]+"_mask.nii.gz"))
                         self.seg_mask_status.append(2) # 0 - no mask, 1 - mask path, cannot load , 2 - mask loaded
                         logger.info(f'Found mask for {file}')
                     else:
@@ -456,9 +459,11 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
                         
         self.current_index = 0               
         # load the .cvs file with the old annotations or create a new one
+        print("Path exists",os.path.exists(directory+"/annotations.csv"))
         if os.path.exists(directory+"/annotations.csv"):
+        
             ann_csv = pd.read_csv(directory+"/annotations.csv", header=None,index_col=False, names=["file","annotation","comment","mask_path","mask_status"])
-            
+            print(ann_csv)
             if self.unique_case_flag:
                 self.nifti_files, self.segmentation_files, self.seg_mask_status, self.id_subs, self.id_subs_checked = self._restore_index(ann_csv, self.nifti_files,
                                                                                                  self.segmentation_files, self.seg_mask_status)
