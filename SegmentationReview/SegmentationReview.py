@@ -519,10 +519,10 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         if  self.finish_flag == False:
             head, tail = os.path.split(self.nifti_files[self.current_index])
             print("Head, tail", head, tail)
-            data = {'file': [self.nifti_files[self.current_index].replace(head,"")],
+            data = {'file': [self.nifti_files[self.current_index].replace(head,"").replace("/","").replace("\\","")],
                         'annotation': [self._rating_to_str(likert_score)],
                         'comment': [self.ui.comment.toPlainText()],
-                        'mask_path': [self.segmentation_files[self.current_index].replace(head,"")],
+                        'mask_path': [self.segmentation_files[self.current_index].replace(head,"").replace("/","").replace("\\","")],
                         'mask_status': [self._numerical_status_to_str(self.seg_mask_status[self.current_index])]}
             df = pd.DataFrame(data)   
             df.to_csv(os.path.join(self.directory,"annotations.csv"), mode='a', index=False, header=False)
