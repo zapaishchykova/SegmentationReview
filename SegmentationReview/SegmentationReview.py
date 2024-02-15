@@ -3,6 +3,7 @@ import os
 
 import vtk
 import pathlib
+from pathlib import Path
 import slicer
 from slicer.ScriptedLoadableModule import *
 from slicer.util import VTKObservationMixin
@@ -223,19 +224,23 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
                 self.segmentEditorWidget.setSourceVolumeNodeID(self.sourceVolumeNodeID)
         self.initializeParameterNode()
     
+    def joinpath(self,rootdir,targetdir):
+        return os.path.join(os.sep, rootdir+os.sep,targetdir)
+    
+
     def overwrite_mask_clicked(self):
         # overwrite self.segmentEditorWidget.segmentationNode()
         self.segmentation_node = slicer.mrmlScene.GetFirstNodeByClass('vtkMRMLSegmentationNode')
-        file_path = os.path.join(self.directory,"t.seg.nrrd")
+        file_path = self.joinpath(self.directory,"t.seg.nrrd")
         # Save the segmentation node to file as nifti
-        self.file_path_nifti = self.nifti_files[self.current_index].split(".")[0]+f"_mask_{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}.nii.gz"
+        self.file_path_nifti = str(self.nifti_files[self.current_index]).split(".")[0]+f"_mask_{datetime.now().strftime('%Y%m%d_%H%M%S')}.nii.gz"
         self.seg_mask_status[self.current_index] = 3
         # add to the list of segmentation files
         self.segmentation_files[self.current_index] = self.file_path_nifti
-        
         # Save the segmentation node to file
         slicer.util.saveNode(self.segmentation_node, file_path)
         img = sitk.ReadImage(file_path)
+        
         sitk.WriteImage(img, self.file_path_nifti)
         
         #delete the temporary file
@@ -253,7 +258,7 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         if os.path.isabs(path):
             return path
         else:
-            return os.path.join(self.directory, path)
+            return self.joinpath(self.directory, path)
     
     def _restore_index(self, ann_csv, files_list, mask_list, mask_status_list=None):
         #print(files_list,mask_list)
@@ -343,11 +348,14 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         self.segmentEditorWidget.setMRMLSegmentEditorNode(self.parameterSetNode)
    
     def onAtlasDirectoryChanged(self, directory):
+        
+        self.directory = os.path.normpath(directory)
+        directory = self.directory
         logger = logging.getLogger('SegmentationReview')
         logger.setLevel(logging.DEBUG)
 
         # Set up logging to file
-        fileHandler = logging.FileHandler(directory+'/segmentation_review.log')
+        fileHandler = logging.FileHandler(self.joinpath(directory,'segmentation_review.log'))
         fileHandler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
         logger.addHandler(fileHandler) 
         
@@ -356,31 +364,30 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
             slicer.mrmlScene.RemoveNode(self.segmentation_node)
         except:
             pass
-        self.directory = directory
         
         self.unique_case_flag=False
         # case 0: searching for one unique nifti file for id
         # they 
-        if os.path.exists(os.path.join(directory,"mapping_unique.csv")):
+        if os.path.exists(self.joinpath(directory,"mapping_unique.csv")):
             case_flag = True
             # mapping file contains id and nifti file name
             id_subs = []
-            self.mappings = pd.read_csv(os.path.join(directory,"mapping_unique.csv"))
+            self.mappings = pd.read_csv(self.joinpath(directory,"mapping_unique.csv"))
             self.unique_case_flag = True
             for id_subj, img, mask in zip(self.mappings["subj_id"], self.mappings["img_path"], self.mappings["mask_path"]):
                 # counting images
-                if os.path.exists(os.path.join(directory,img)) and self._is_valid_extension(os.path.join(directory,img)):
-                    self.nifti_files.append(os.path.join(directory,img))
+                if os.path.exists(self.joinpath(directory,img)) and self._is_valid_extension(self.joinpath(directory,img)):
+                    self.nifti_files.append(self.joinpath(directory,img))
                     id_subs.append(id_subj)
                     # counting masks
                     # check if mask is 
                     if type(mask) == str:
-                        if os.path.exists(os.path.join(directory,mask)) and self._is_valid_extension(os.path.join(directory,mask)):
+                        if os.path.exists(self.joinpath(directory,mask)) and self._is_valid_extension(self.joinpath(directory,mask)):
                             
-                            self.segmentation_files.append(os.path.join(directory,mask))
+                            self.segmentation_files.append(self.joinpath(directory,mask))
                             self.seg_mask_status.append(2) # 0 - no mask, 1 - mask path, cannot load , 2 - mask loaded
                             logger.info(f'Found mask for {img}')
-                        elif self._is_valid_extension(os.path.join(directory,mask)) and not os.path.exists(os.path.join(directory,mask)):
+                        elif self._is_valid_extension(self.joinpath(directory,mask)) and not os.path.exists(self.joinpath(directory,mask)):
                            
                             self.segmentation_files.append("")
                             self.seg_mask_status.append(1) # 0 - no mask, 1 - mask path, cannot load , 2 - mask loaded
@@ -402,26 +409,26 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
             #print("Unique:",len(np.unique(self.id_subs)),id_subs)   
         
         # case 1: mapper cvs is present
-        elif os.path.exists(os.path.join(directory,"mapping.csv")):
+        elif os.path.exists(self.joinpath(directory,"mapping.csv")):
             logger.info('Found mappings between files and masks') 
             #print("Found mappings between files and masks")
-            self.mappings = pd.read_csv(os.path.join(directory,"mapping.csv"))
+            self.mappings = pd.read_csv(self.joinpath(directory,"mapping.csv"))
             self.with_mapper_flag = True
             # casting to zero all nan values
             
             #print("Loaded mappings between files and masks")
             for img, mask in zip(self.mappings["img_path"], self.mappings["mask_path"]):
                 # counting images
-                if os.path.exists(os.path.join(directory,img)) and self._is_valid_extension(os.path.join(directory,img)):
-                    self.nifti_files.append(os.path.join(directory,img))
+                if os.path.exists(self.joinpath(directory,img)) and self._is_valid_extension(self.joinpath(directory,img)):
+                    self.nifti_files.append(self.joinpath(directory,img))
                     # counting masks
                     # check if mask is 
                     if type(mask) == str:
-                        if os.path.exists(os.path.join(directory,mask)) and self._is_valid_extension(os.path.join(directory,mask)):
-                            self.segmentation_files.append(os.path.join(directory,mask))
+                        if os.path.exists(self.joinpath(directory,mask)) and self._is_valid_extension(self.joinpath(directory,mask)):
+                            self.segmentation_files.append(self.joinpath(directory,mask))
                             self.seg_mask_status.append(2) # 0 - no mask, 1 - mask path, cannot load , 2 - mask loaded
                             logger.info(f'Found mask for {img}')
-                        elif self._is_valid_extension(os.path.join(directory,mask)) and not os.path.exists(os.path.join(directory,mask)):
+                        elif self._is_valid_extension(self.joinpath(directory,mask)) and not os.path.exists(self.joinpath(directory,mask)):
                             self.segmentation_files.append("")
                             self.seg_mask_status.append(1) # 0 - no mask, 1 - mask path, cannot load , 2 - mask loaded
                             logger.info(f'Cannot load mask for {img}, check path')
@@ -444,24 +451,25 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
             #print("No mappings between files and masks")
             for file in os.listdir(directory):
                 if ".nii" in file and "_mask" not in file:  
-                    self.nifti_files.append(os.path.join(directory,file)) #
-                    if os.path.exists(os.path.join(directory,file.split(".")[0]+"_mask.nii.gz")):
-                        self.segmentation_files.append(os.path.join(directory,file.split(".")[0]+"_mask.nii.gz"))
+                    self.nifti_files.append(self.joinpath(directory,file)) #
+                    
+                    if os.path.exists(self.joinpath(directory,file.split(".")[0]+"_mask.nii.gz")):
+                        self.segmentation_files.append(self.joinpath(directory,file.split(".")[0]+"_mask.nii.gz"))
                         self.seg_mask_status.append(2) # 0 - no mask, 1 - mask path, cannot load , 2 - mask loaded
                         logger.info(f'Found mask for {file}')
                     else:
                         self.segmentation_files.append("")
                         self.seg_mask_status.append(0) # 0 - no mask, 1 - mask path, cannot load , 2 - mask loaded
                         logger.info(f'No mask for {file}')
-                else:
-                    logger.info(f'File {file} does not exist or has wrong extension, skipping')
+                #else:
+                #    logger.info(f'File {file} does not exist or has wrong extension, skipping')
                         
         self.current_index = 0               
         # load the .cvs file with the old annotations or create a new one
-        #print("Path exists",os.path.exists(os.path.join(directory,"annotations.csv")))
-        if os.path.exists(os.path.join(directory,"annotations.csv")):
+        #print("Path exists",os.path.exists(self.joinpath(directory,"annotations.csv")))
+        if os.path.exists(self.joinpath(directory,"annotations.csv")):
         
-            ann_csv = pd.read_csv(os.path.join(directory,"annotations.csv"), header=None,index_col=False, names=["file","annotation","comment","mask_path","mask_status"])
+            ann_csv = pd.read_csv(self.joinpath(directory,"annotations.csv"), header=None,index_col=False, names=["file","annotation","comment","mask_path","mask_status"])
             #print(ann_csv)
             if self.unique_case_flag:
                 self.nifti_files, self.segmentation_files, self.seg_mask_status, self.id_subs, self.id_subs_checked = self._restore_index(ann_csv, self.nifti_files,
@@ -518,14 +526,13 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         # append data frame to CSV file
         if  self.finish_flag == False:
             head, tail = os.path.split(self.nifti_files[self.current_index])
-            print("Head, tail", head, tail)
             data = {'file': [self.nifti_files[self.current_index].replace(head,"").replace("/","").replace("\\","")],
                         'annotation': [self._rating_to_str(likert_score)],
                         'comment': [self.ui.comment.toPlainText()],
                         'mask_path': [self.segmentation_files[self.current_index].replace(head,"").replace("/","").replace("\\","")],
                         'mask_status': [self._numerical_status_to_str(self.seg_mask_status[self.current_index])]}
             df = pd.DataFrame(data)   
-            df.to_csv(os.path.join(self.directory,"annotations.csv"), mode='a', index=False, header=False)
+            df.to_csv(self.joinpath(self.directory,"annotations.csv"), mode='a', index=False, header=False)
         
         # go to the next file if there is one
         ret = 0
