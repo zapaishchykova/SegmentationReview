@@ -89,8 +89,7 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         self.unique_case_flag=False
         self.finish_flag = False
         self.pointListNode = None
-        self.hu_window = None   # To store current HU window settings
-        self.hu_level = None   #  To store current HU level settings
+        self.window_level = None   # To store current window/level settings
         self.segment_visiblity_states = {}  # Dictionary to store the visibility toggle of each segment
 
 
@@ -532,8 +531,8 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         ret = 0
         if self.current_index <= self.n_files:#-1:
             if self.volume_node:
-                # Store current HU window and level
-                self.store_current_hu_settings()
+                # Store current window and level
+                self.store_current_window_level_settings()
                 slicer.mrmlScene.RemoveNode(self.volume_node)
             if self.segmentation_node:
                 # Store current mask label visibility states
@@ -564,19 +563,18 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
             self.ui.status_checked.setText("Checked: "+ str(self.current_index) + " / "+str(self.n_files))
 
         else:
-            #print("_All files checked") 
+            #print("_All files checked")
             self.finish_flag = True
 
-    def store_current_hu_settings(self):
+    def store_current_window_level_settings(self):
         """Store current HU window and level settings."""
-        self.hu_window = self.volume_node.GetDisplayNode().GetWindow()
-        self.hu_level = self.volume_node.GetDisplayNode().GetLevel()
+        self.window_level = (self.volume_node.GetDisplayNode().GetWindow(), self.volume_node.GetDisplayNode().GetLevel())
 
-    def restore_hu_settings(self):
-        if self.hu_window is not None and self.hu_level is not None:
+    def restore_window_level_settings(self):
+        if self.window_level is not None:
             self.volume_node.GetDisplayNode().SetAutoWindowLevel(False)
-            self.volume_node.GetDisplayNode().SetWindow(self.hu_window)
-            self.volume_node.GetDisplayNode().SetLevel(self.hu_level)
+            self.volume_node.GetDisplayNode().SetWindow(self.window_level[0])
+            self.volume_node.GetDisplayNode().SetLevel(self.window_level[1])
         else:
             self.volume_node.GetDisplayNode().SetAutoWindowLevel(True)
 
@@ -611,7 +609,7 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
 
         self.volume_node = slicer.util.loadVolume(self.nifti_files[self.current_index])
         # Adjust window/level based on the previous settings, if any.
-        self.restore_hu_settings()
+        self.restore_window_level_settings()
         
         try:
             self.segmentation_node = slicer.util.loadSegmentation(self.segmentation_files[self.current_index])
