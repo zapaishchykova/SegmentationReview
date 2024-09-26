@@ -605,27 +605,26 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
                 return 0
             elif self.current_index == self.n_files:
                 return 1
-        
-        # Load the volume in the background
-        file_path = self.nifti_files[self.current_index]
-        self.volume_node = slicer.util.loadVolume(file_path, properties={"show": False})
-        # Adjust window/level based on the previous settings, if any
+
+        # Pause rendering until all data is loaded
+        slicer.app.layoutManager().setRenderPaused(True)
+
+        self.volume_node = slicer.util.loadVolume(self.nifti_files[self.current_index])
+        # Adjust window/level based on the previous settings, if any.
         self.restore_hu_settings()
         
         try:
-            segmentation_file_path = self.segmentation_files[self.current_index]
-            self.segmentation_node = slicer.util.loadSegmentation(segmentation_file_path)
-            # Restore the segment visibility toggles from the previous segmentation, if any
+            self.segmentation_node = slicer.util.loadSegmentation(self.segmentation_files[self.current_index])
+            # Restore the segment visibility toggles from the previous segmentation, if any.
             self.restore_segment_visiblity_states()
             # Set the segmentation node to the segment editor widget
             self.set_segmentation_and_mask_for_segmentation_editor()
         except:
             if not unique:
                 self.enter()
-        
-        # The volume was loaded in the background, now make it visible
-        slicer.app.applicationLogic().GetSelectionNode().SetActiveVolumeID(self.volume_node.GetID())
-        slicer.app.applicationLogic().PropagateVolumeSelection()
+
+        # Resume rendering to show the loaded data
+        slicer.app.layoutManager().setRenderPaused(False)
         
         return None
 
