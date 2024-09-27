@@ -162,8 +162,9 @@ Version available in 3D Slicer 5.3.0-5.5.0 marketplace does not include "no mask
 - If your path is too long, the resizing might not work. To fix this, just collapse the the "Input path" panel and then you would be able to resize the window. 
 
 ## Acknowledgements
-We would like to thank for their significant contributions to the project:
-Vasco Prudente @vprudente
+We would like to thank these authors for their significant contributions to the project:
+- Vasco Prudente @vprudente
+- Ibrahim Hadzic  @ibro45
 
 ## License
 This extension is distributed under the terms of the MIT license.
