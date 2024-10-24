@@ -1,10 +1,8 @@
 import logging
-import os
+import os, shutil
 
 import vtk
-import pathlib
-from pathlib import Path
-import slicer
+
 from slicer.ScriptedLoadableModule import *
 from slicer.util import VTKObservationMixin
 import ctk
@@ -227,23 +225,42 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
     def overwrite_mask_clicked(self):
         # overwrite self.segmentEditorWidget.segmentationNode()
         self.segmentation_node = slicer.mrmlScene.GetFirstNodeByClass('vtkMRMLSegmentationNode')
-        file_path = self.joinpath(self.directory,"t.seg.nrrd")
-        # Save the segmentation node to file as nifti
-        self.file_path_nifti = str(self.nifti_files[self.current_index]).split(".")[0]+f"_mask_{datetime.now().strftime('%Y%m%d_%H%M%S')}.nii.gz"
+
+        file_path = self.segmentation_files[self.current_index]
+
+        print("Overwrite mask",file_path)
+        edited_mask_filename = str(os.path.basename(self.nifti_files[self.current_index])).split(".")[0]+f"_edited_mask_{datetime.now().strftime('%Y%m%d_%H%M%S')}.nii.gz"
+        edited_mask_filepath = os.path.join(self.directory, edited_mask_filename)
+
+        # Convert the segmentation node to a labelmap volume node (https://slicer.readthedocs.io/en/latest/developer_guide/script_repository.html#export-labelmap-node-from-segmentation-node)
+        edited_mask_labelmapVolumeNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLLabelMapVolumeNode")
+        referenceVolumeNode = slicer.mrmlScene.GetFirstNodeByClass("vtkMRMLScalarVolumeNode")
+        slicer.modules.segmentations.logic().ExportVisibleSegmentsToLabelmapNode(self.segmentation_node, edited_mask_labelmapVolumeNode, referenceVolumeNode)
+        edited_mask_labelmapVolumeNode.SetName(edited_mask_filename.split(".")[0])
+
+        # Save the edited mask to file
+        slicer.util.saveNode(edited_mask_labelmapVolumeNode, edited_mask_filepath)
+        print(f"Saved edited mask to {edited_mask_filepath}")
+
+        # update the mask status
         self.seg_mask_status[self.current_index] = 3
         # add to the list of segmentation files
-        self.segmentation_files[self.current_index] = self.file_path_nifti
-        # Save the segmentation node to file
-        slicer.util.saveNode(self.segmentation_node, file_path)
-        img = sitk.ReadImage(file_path)
-        
-        sitk.WriteImage(img, self.file_path_nifti)
-        
+        self.segmentation_files[self.current_index] = edited_mask_filepath
+
+        # move the previous mask to a backup folder (instead of deleting it)
+        backup_folder = os.path.join(self.directory, "backup_masks")
+        if not os.path.exists(backup_folder):
+            os.makedirs(backup_folder)
+        backup_mask_filepath = os.path.join(backup_folder, os.path.basename(file_path))
+        shutil.move(file_path, backup_mask_filepath)
+
         #delete the temporary file
-        try:
-            os.remove(file_path)
-        except:
-            pass
+        # try:
+        #     os.remove(file_path)
+        # except OSError as e:
+        #     print("Error: %s : %s" % (file_path, e.strerror))
+
+
 
     def joinpath(self,rootdir,targetdir):
         return os.path.join(os.sep, rootdir+os.sep,targetdir)
