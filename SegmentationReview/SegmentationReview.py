@@ -225,10 +225,8 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
     def overwrite_mask_clicked(self):
         # overwrite self.segmentEditorWidget.segmentationNode()
         self.segmentation_node = slicer.mrmlScene.GetFirstNodeByClass('vtkMRMLSegmentationNode')
-
         file_path = self.segmentation_files[self.current_index]
-
-        print("Overwrite mask",file_path)
+        print("Overwriting mask",file_path)
         edited_mask_filename = str(os.path.basename(self.nifti_files[self.current_index])).split(".")[0]+f"_edited_mask_{datetime.now().strftime('%Y%m%d_%H%M%S')}.nii.gz"
         edited_mask_filepath = os.path.join(self.directory, edited_mask_filename)
 
@@ -252,14 +250,11 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         if not os.path.exists(backup_folder):
             os.makedirs(backup_folder)
         backup_mask_filepath = os.path.join(backup_folder, os.path.basename(file_path))
-        shutil.move(file_path, backup_mask_filepath)
-
-        #delete the temporary file
-        # try:
-        #     os.remove(file_path)
-        # except OSError as e:
-        #     print("Error: %s : %s" % (file_path, e.strerror))
-
+        try:
+            shutil.move(file_path, backup_mask_filepath)
+            print(f"Moved previous mask to {backup_mask_filepath}")
+        except OSError as e:
+            print(f"Error moving previous mask to {backup_mask_filepath}: {e}")
 
 
     def joinpath(self,rootdir,targetdir):
