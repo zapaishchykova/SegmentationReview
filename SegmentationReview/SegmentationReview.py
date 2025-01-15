@@ -3,6 +3,10 @@ import os, shutil
 
 import vtk
 
+import pathlib
+from pathlib import Path
+import slicer
+
 from slicer.ScriptedLoadableModule import *
 from slicer.util import VTKObservationMixin
 import ctk
