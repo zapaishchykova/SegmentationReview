@@ -89,8 +89,9 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         self.unique_case_flag=False
         self.finish_flag = False
         self.pointListNode = None
-        self.window_level = None   # To store current window/level settings
-        self.segment_visiblity_states = {}  # Dictionary to store the visibility toggle of each segment
+        self.window_level = None
+        self.segment_visiblity_states = {}
+        self.lock_visibility = False
 
 
 
@@ -156,7 +157,12 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         self.atlasDirectoryButton.directoryChanged.connect(self.onAtlasDirectoryChanged)
         self.ui.save_and_next.connect('clicked(bool)', self.save_and_next_clicked)
         self.ui.overwrite_mask.connect('clicked(bool)', self.overwrite_mask_clicked)
-        
+
+        self.lockVisibilityCheckbox = qt.QCheckBox("Lock label visibility across cases")
+        self.lockVisibilityCheckbox.setChecked(False)
+        self.lockVisibilityCheckbox.stateChanged.connect(lambda state: setattr(self, 'lock_visibility', bool(state)))
+        self.layout.addWidget(self.lockVisibilityCheckbox)
+
         # add a paint brush from segment editor window
         # Create a new segment editor widget and add it to the NiftyViewerWidget
         self._createSegmentEditorWidget_()
@@ -352,6 +358,7 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         self.with_mapper_flag = False
         self.finish_flag = False
         self.current_index = 0
+        self.segment_visiblity_states = {}
 
         self.directory = os.path.normpath(directory)
         directory = self.directory
@@ -586,16 +593,14 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
             self.volume_node.GetDisplayNode().SetAutoWindowLevel(True)
 
     def store_segment_visiblity_states(self):
-        """Store the visibility states of mask labels."""
-        for segment_id in self.segmentation_node.GetSegmentation().GetSegmentIDs():
-            visibility = self.segmentation_node.GetDisplayNode().GetSegmentVisibility(segment_id)
-            self.segment_visiblity_states[segment_id] = visibility
+        for i, seg_id in enumerate(self.segmentation_node.GetSegmentation().GetSegmentIDs()):
+            self.segment_visiblity_states[i] = self.segmentation_node.GetDisplayNode().GetSegmentVisibility(seg_id)
 
     def restore_segment_visiblity_states(self):
-        """Restore the visibility states of mask labels.""" 
-        for segment_id in self.segmentation_node.GetSegmentation().GetSegmentIDs():
-            visibility = self.segment_visiblity_states.get(segment_id, True)
-            self.segmentation_node.GetDisplayNode().SetSegmentVisibility(segment_id, visibility)
+        if not self.lock_visibility:
+            return
+        for i, seg_id in enumerate(self.segmentation_node.GetSegmentation().GetSegmentIDs()):
+            self.segmentation_node.GetDisplayNode().SetSegmentVisibility(seg_id, self.segment_visiblity_states.get(i, True))
 
 
     def load_nifti_file(self, unique=False):
@@ -653,8 +658,9 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         self.pointListNode.CreateDefaultDisplayNodes()
         
         markupsLogic = slicer.modules.markups.logic()
+        displayNode = self.segmentation_node.GetDisplayNode()
         for segmentId in stats["SegmentIDs"]:
-            if self.segment_visiblity_states.get(segmentId, True):
+            if displayNode.GetSegmentVisibility(segmentId):
                 centroid_ras = stats[segmentId, "LabelmapSegmentStatisticsPlugin.centroid_ras"]
                 markupsLogic.JumpSlicesToLocation(*centroid_ras, False)
 
