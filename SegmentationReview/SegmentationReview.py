@@ -661,7 +661,7 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         seg_ids = list(self.segmentation_node.GetSegmentation().GetSegmentIDs())
         for segmentId in stats["SegmentIDs"]:
             idx = seg_ids.index(segmentId) if segmentId in seg_ids else None
-            if self.segment_visiblity_states.get(idx, True):
+            if not self.lock_visibility or self.segment_visiblity_states.get(idx, True):
                 centroid_ras = stats[segmentId, "LabelmapSegmentStatisticsPlugin.centroid_ras"]
                 markupsLogic.JumpSlicesToLocation(*centroid_ras, False)
 
