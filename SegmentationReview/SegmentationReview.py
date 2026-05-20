@@ -658,10 +658,9 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         self.pointListNode.CreateDefaultDisplayNodes()
         
         markupsLogic = slicer.modules.markups.logic()
-        seg_ids = list(self.segmentation_node.GetSegmentation().GetSegmentIDs())
+        displayNode = self.segmentation_node.GetDisplayNode()
         for segmentId in stats["SegmentIDs"]:
-            idx = seg_ids.index(segmentId) if segmentId in seg_ids else None
-            if not self.lock_visibility or self.segment_visiblity_states.get(idx, True):
+            if displayNode.GetSegmentVisibility(segmentId):
                 centroid_ras = stats[segmentId, "LabelmapSegmentStatisticsPlugin.centroid_ras"]
                 markupsLogic.JumpSlicesToLocation(*centroid_ras, False)
 
