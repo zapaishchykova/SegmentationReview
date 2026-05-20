@@ -252,6 +252,8 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         return any(path.endswith(i) for i in [".nii", ".nii.gz", ".nrrd"])
     
     def _construct_full_path(self, path):
+        if not isinstance(path, str):
+            return ""
         if os.path.isabs(path):
             return path
         else:
@@ -266,10 +268,7 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         list_of_checked = [self._construct_full_path(i) for i in list_of_checked]
         
         list_of_checked_masks = ann_csv['mask_path'].values
-        #print(list_of_checked)
-        # check if ['mask_path'] is empty
-        if type(list_of_checked_masks[0]) == str:
-            list_of_checked_masks = [self._construct_full_path(i) for i in list_of_checked_masks]
+        list_of_checked_masks = [self._construct_full_path(i) for i in list_of_checked_masks]
         
         #find subset of files that are not checked
         if self.unique_case_flag:
@@ -345,7 +344,15 @@ class SegmentationReviewWidget(ScriptedLoadableModuleWidget, VTKObservationMixin
         self.segmentEditorWidget.setMRMLSegmentEditorNode(self.parameterSetNode)
    
     def onAtlasDirectoryChanged(self, directory):
-        
+        self.nifti_files = []
+        self.segmentation_files = []
+        self.seg_mask_status = []
+        self.id_subs = []
+        self.id_subs_checked = []
+        self.with_mapper_flag = False
+        self.finish_flag = False
+        self.current_index = 0
+
         self.directory = os.path.normpath(directory)
         directory = self.directory
         logger = logging.getLogger('SegmentationReview')
